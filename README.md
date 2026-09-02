@@ -53,6 +53,15 @@ only the requested change.*
 robot from the reference image, now on a rain-soaked neon-lit city street at
 night" — same robot, brand-new scene.*
 
+## Companion plugin
+
+**[minimax-h3-comfyui-video](https://github.com/RouterGlock/minimax-h3-comfyui-video)**
+is the same idea for video: a local model writes the prompt and calls ComfyUI +
+**MiniMax H3** to generate short 3–5 s clips (with the audio H3 generates in the
+same pass) straight into the chat. Same three-tool / three-preset shape —
+`minimax_generate_video` (text → clip), `minimax_animate_image` (image → clip),
+and `minimax_reference_video` (reference image + prompt → new scene).
+
 ## Video demo
 
 *Coming soon — a short screen recording of the full flow (asking for an
