@@ -1,0 +1,27 @@
+{
+  "1":  { "class_type": "UnetLoaderGGUF", "inputs": { "unet_name": "qwen-image-edit-2511-Q5_K_M.gguf" } },
+  "2":  { "class_type": "CLIPLoader", "inputs": { "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors", "type": "qwen_image", "device": "default" } },
+  "3":  { "class_type": "VAELoader", "inputs": { "vae_name": "qwen_image_vae.safetensors" } },
+
+  "20": { "class_type": "ModelSamplingAuraFlow", "inputs": { "model": ["1", 0], "shift": 3.1 } },
+  "21": { "class_type": "CFGNorm", "inputs": { "model": ["20", 0], "strength": 1.0 } },
+  "22": { "class_type": "LoraLoaderModelOnly", "inputs": { "model": ["21", 0], "lora_name": "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors", "strength_model": 1.0 } },
+
+  "10": { "class_type": "LoadImage", "inputs": { "image": "" } },
+  "11": { "class_type": "FluxKontextImageScale", "inputs": { "image": ["10", 0] } },
+
+  "4":  { "class_type": "TextEncodeQwenImageEditPlus", "inputs": { "clip": ["2", 0], "vae": ["3", 0], "prompt": "", "image1": ["11", 0] } },
+  "5":  { "class_type": "TextEncodeQwenImageEditPlus", "inputs": { "clip": ["2", 0], "vae": ["3", 0], "prompt": "", "image1": ["11", 0] } },
+
+  "23": { "class_type": "FluxKontextMultiReferenceLatentMethod", "inputs": { "conditioning": ["4", 0], "reference_latents_method": "index_timestep_zero" } },
+  "24": { "class_type": "FluxKontextMultiReferenceLatentMethod", "inputs": { "conditioning": ["5", 0], "reference_latents_method": "index_timestep_zero" } },
+
+  "25": { "class_type": "VAEEncode", "inputs": { "pixels": ["11", 0], "vae": ["3", 0] } },
+
+  "6":  { "class_type": "EmptySD3LatentImage", "inputs": { "width": 1216, "height": 832, "batch_size": 1 } },
+
+  "7":  { "class_type": "KSampler", "inputs": { "model": ["22", 0], "seed": 0, "steps": 4, "cfg": 1.0, "sampler_name": "euler", "scheduler": "simple", "denoise": 1.0, "positive": ["23", 0], "negative": ["24", 0], "latent_image": ["25", 0] } },
+
+  "13": { "class_type": "VAEDecode", "inputs": { "samples": ["7", 0], "vae": ["3", 0] } },
+  "14": { "class_type": "SaveImage", "inputs": { "filename_prefix": "qwen-image-edit-2511", "images": ["13", 0] } }
+}

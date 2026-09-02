@@ -26,22 +26,25 @@ const COMFYUI_IS_LOCAL = /^https?:\/\/(127\.0\.0\.1|localhost|0\.0\.0\.0|\[::1\]
 );
 
 // Workflow files live at the plugin root; this file runs from dist/ once built.
-const GENERATE_WORKFLOW_PATH = join(__dirname, "..", "workflow.json");
-const EDIT_WORKFLOW_PATH = join(__dirname, "..", "workflow-edit.json");
-const REFERENCE_WORKFLOW_PATH = join(__dirname, "..", "workflow-reference.json");
+// Qwen-Image workflows: base Qwen-Image for t2i, Qwen-Image-Edit-2511 for edit/reference.
+const QWEN_T2I_WORKFLOW_PATH = join(__dirname, "..", "workflow-qwen-t2i.json");
+const QWEN_EDIT_WORKFLOW_PATH = join(__dirname, "..", "workflow-qwen-edit.json");
+const QWEN_REFERENCE_WORKFLOW_PATH = join(__dirname, "..", "workflow-qwen-reference.json");
+
+// Cold Qwen runs (GGUF load + dequant + Qwen2.5-VL encode + sampling) can exceed the
+// 300s default, so the Qwen tools pass this explicitly.
+const QWEN_TIMEOUT_MS = 900_000;
 
 const POSITIVE_PROMPT_NODE_ID = "4";
 const NEGATIVE_PROMPT_NODE_ID = "5";
 const LATENT_SIZE_NODE_ID = "6";
 const SEED_NODE_ID = "7";
 
-// workflow-edit.json: LoadImage -> ImageScale -> node 4's image1 input.
+// workflow-qwen-edit.json: source image loads into node 10.
 const EDIT_LOAD_IMAGE_NODE_ID = "10";
-const EDIT_SCALE_NODE_ID = "11";
 
-// workflow-reference.json: up to 3 (LoadImage -> ImageScale) pairs feeding node 4's image1/2/3 inputs.
+// workflow-qwen-reference.json: up to 3 LoadImage nodes feeding node 4's image1/2/3 inputs.
 const REFERENCE_LOAD_IMAGE_NODE_IDS = ["10", "14", "15"] as const;
-const REFERENCE_SCALE_NODE_IDS = ["11", "12", "13"] as const;
 
 const MARKDOWN_REPLY_RULE =
   "This tool's result IS the literal chat reply, verbatim: your entire response must start with that exact " +
@@ -319,18 +322,20 @@ async function runWorkflowAndReturnMarkdown(
 }
 
 export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[]> {
-  const generateComfyUIImage = tool({
-    name: "generate_comfyui_image",
+  // ---- Qwen-Image tools -----------------------------------------------------
+  // Backed by base Qwen-Image (t2i) and Qwen-Image-Edit-2511 (edit/reference):
+  // slower than a distilled turbo model, but far cleaner for illustration and
+  // style conversion, and it actually holds composition on an edit.
+
+  const qwenGenerateImage = tool({
+    name: "qwen_generate_image",
     description:
-      "Generate a brand-new image locally via ComfyUI (Z-Image Turbo), from a text description alone " +
-      "(no existing image involved). Use this when the user asks to create, draw, or generate an image " +
-      "from scratch. Always pass a single, richly detailed, natural-language English prompt (subject, " +
-      "environment, mood, lighting, style) rather than a short tag list or the user's raw request. " +
+      "Generate a brand-new image locally via ComfyUI using base Qwen-Image (no existing image involved). " +
+      "Use this when the user asks to create, draw, or generate an image from scratch (~1-2 min). Pass one " +
+      "richly detailed natural-language English prompt (subject, environment, mood, lighting, style). " +
       MARKDOWN_REPLY_RULE,
     parameters: {
-      prompt: z.string().describe(
-        "A detailed, natural-language English description of the desired image."
-      ),
+      prompt: z.string().describe("A detailed, natural-language English description of the desired image."),
       negative_prompt: z
         .string()
         .optional()
@@ -338,38 +343,47 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
       aspect_ratio: z
         .enum(["square", "landscape", "portrait"])
         .optional()
-        .describe("Image shape. Defaults to square (1024x1024).")
+        .describe("Image shape. Defaults to landscape (1216x832).")
     },
     implementation: async ({ prompt, negative_prompt, aspect_ratio }, { status }) => {
       await ensureComfyUIReady(status);
 
-      const workflow = await loadWorkflow(GENERATE_WORKFLOW_PATH);
-      applyPromptFields(workflow, prompt, negative_prompt ?? "", aspect_ratio ?? "square");
+      const ratio = aspect_ratio ?? "landscape";
+      const { width, height } = ASPECT_RATIOS[ratio];
+      const workflow = await loadWorkflow(QWEN_T2I_WORKFLOW_PATH);
 
-      return runWorkflowAndReturnMarkdown(workflow, ctl.getWorkingDirectory(), status);
+      // Qwen t2i uses CLIPTextEncode (field `text`), not the `prompt` field applyPromptFields writes.
+      workflow[POSITIVE_PROMPT_NODE_ID].inputs.text = prompt;
+      workflow[NEGATIVE_PROMPT_NODE_ID].inputs.text = negative_prompt ?? "";
+      workflow[LATENT_SIZE_NODE_ID].inputs.width = width;
+      workflow[LATENT_SIZE_NODE_ID].inputs.height = height;
+      workflow[SEED_NODE_ID].inputs.seed = Math.floor(Math.random() * 2 ** 32);
+
+      return runWorkflowAndReturnMarkdown(workflow, ctl.getWorkingDirectory(), status, QWEN_TIMEOUT_MS);
     }
   });
 
-  const editComfyUIImage = tool({
-    name: "edit_comfyui_image",
+  const qwenEditImage = tool({
+    name: "qwen_edit_image",
     description:
-      "Edit an existing local image file, given its exact file path and an instruction describing the " +
-      "change (e.g. 'change the background to a beach at sunset', 'make it black and white', 'add a hat'). " +
-      "Uses ComfyUI (Z-Image Turbo's native edit conditioning). Use this when the user wants to modify a " +
-      "specific image that already exists on disk — including a path this plugin returned earlier in the " +
-      "chat — rather than create something new. " +
+      "Edit, restyle, or heavily transform an existing local image via ComfyUI (Qwen-Image-Edit 2511) — e.g. " +
+      "turn a photo into a flat 2D cartoon / illustration / painting, change the background, or add/remove " +
+      "an element, while keeping the same composition, people, and poses (~1-3 min). Give an exact file " +
+      "path plus an instruction describing the change and what to preserve. " +
       MARKDOWN_REPLY_RULE,
     parameters: {
-      image_path: z.string().describe("Absolute path to the existing image file to edit."),
-      prompt: z.string().describe("A clear, natural-language description of the change to make to the image."),
+      image_path: z.string().describe("Absolute path to the existing image file to restyle."),
+      prompt: z
+        .string()
+        .describe("Instruction: the target art style plus what to keep (people, poses, framing, background)."),
       negative_prompt: z
         .string()
         .optional()
-        .describe("What to avoid in the result, e.g. 'blurry, watermark, text'. Optional."),
+        .describe("What to avoid, e.g. 'photorealistic, film grain, noise, 3d render'. Optional."),
       aspect_ratio: z
         .enum(["square", "landscape", "portrait"])
         .optional()
-        .describe("Output shape. Defaults to square; pick the one matching the source image when known.")
+        .describe("Output shape hint. Defaults to landscape; the source image's own aspect is largely preserved.")
     },
     implementation: async ({ image_path, prompt, negative_prompt, aspect_ratio }, { status }) => {
       await ensureComfyUIReady(status);
@@ -377,50 +391,41 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
       status("Uploading source image to ComfyUI...");
       const uploaded = await uploadImageToComfyUI(image_path);
 
-      const workflow = await loadWorkflow(EDIT_WORKFLOW_PATH);
-      applyPromptFields(workflow, prompt, negative_prompt ?? "", aspect_ratio ?? "square");
-
-      const { width, height } = ASPECT_RATIOS[aspect_ratio ?? "square"];
+      const workflow = await loadWorkflow(QWEN_EDIT_WORKFLOW_PATH);
+      applyPromptFields(workflow, prompt, negative_prompt ?? "", aspect_ratio ?? "landscape");
       workflow[EDIT_LOAD_IMAGE_NODE_ID].inputs.image = comfyImageRef(uploaded);
-      workflow[EDIT_SCALE_NODE_ID].inputs.width = width;
-      workflow[EDIT_SCALE_NODE_ID].inputs.height = height;
+      // Node 11 is FluxKontextImageScale (auto-sizes to a supported resolution keeping
+      // aspect) — nothing to patch. Node 6 (EmptySD3LatentImage) that applyPromptFields
+      // just wrote is unreachable here (latent comes from VAEEncode) and is ignored.
 
-      return runWorkflowAndReturnMarkdown(workflow, ctl.getWorkingDirectory(), status);
+      return runWorkflowAndReturnMarkdown(workflow, ctl.getWorkingDirectory(), status, QWEN_TIMEOUT_MS);
     }
   });
 
-  const referenceComfyUIImage = tool({
-    name: "reference_comfyui_image",
+  const qwenReferenceImage = tool({
+    name: "qwen_reference_image",
     description:
-      "Generate a NEW image guided by 1-3 existing reference images, given their exact file paths, plus a " +
-      "prompt describing the new scene/composition (e.g. 'put this character on a beach at sunset', " +
-      "'combine the subject of the first image with the style of the second'). Uses ComfyUI (Z-Image " +
-      "Turbo's native reference conditioning) to keep a subject, character, or style consistent while " +
-      "generating something new — this is different from edit_comfyui_image, which modifies the reference " +
-      "image itself rather than creating a new composition inspired by it. " +
+      "Generate a NEW image guided by 1-3 existing reference images (exact file paths) plus a prompt " +
+      "describing the new scene/composition — e.g. 'put the person from image 1 into the setting of image 2', " +
+      "'the subject of image 1 in the art style of image 2'. Uses Qwen-Image-Edit 2511's multi-image " +
+      "conditioning to keep a subject, character, or style consistent while generating a new composition " +
+      "(~2-4 min) — different from qwen_edit_image, which modifies the source image itself. " +
       MARKDOWN_REPLY_RULE,
     parameters: {
       image_path: z.string().describe("Absolute path to the primary reference image."),
-      image_path_2: z
+      image_path_2: z.string().optional().describe("Absolute path to a second reference image, if using more than one."),
+      image_path_3: z.string().optional().describe("Absolute path to a third reference image, if using more than one."),
+      prompt: z
         .string()
-        .optional()
-        .describe("Absolute path to a second reference image, if using more than one."),
-      image_path_3: z
-        .string()
-        .optional()
-        .describe("Absolute path to a third reference image, if using more than one."),
-      prompt: z.string().describe(
-        "A detailed, natural-language description of the new scene/composition to generate, referencing " +
-          "what to draw from the reference image(s)."
-      ),
-      negative_prompt: z
-        .string()
-        .optional()
-        .describe("What to avoid in the result, e.g. 'blurry, watermark, text'. Optional."),
+        .describe(
+          "A detailed description of the new scene/composition, stating what carries over from each reference " +
+            "(subject, style, palette, pose) and what changes."
+        ),
+      negative_prompt: z.string().optional().describe("What to avoid in the result. Optional."),
       aspect_ratio: z
         .enum(["square", "landscape", "portrait"])
         .optional()
-        .describe("Image shape. Defaults to square (1024x1024).")
+        .describe("Image shape. Defaults to landscape.")
     },
     implementation: async (
       { image_path, image_path_2, image_path_3, prompt, negative_prompt, aspect_ratio },
@@ -431,38 +436,28 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
       status("Uploading reference image(s) to ComfyUI...");
 
       const referencePaths = [image_path, image_path_2, image_path_3];
-      const imageCount = referencePaths.filter(Boolean).length;
-      // Each extra reference image adds a real amount of per-step compute (encoding it into
-      // reference latents, then attending over it at every sampling step) — one image stays
-      // well within the 300s default, but two images alone was observed pushing past it.
-      const timeoutMs = 300_000 + 200_000 * (imageCount - 1);
-      const { width, height } = ASPECT_RATIOS[aspect_ratio ?? "square"];
-
-      const workflow = await loadWorkflow(REFERENCE_WORKFLOW_PATH);
-      applyPromptFields(workflow, prompt, negative_prompt ?? "", aspect_ratio ?? "square");
+      const workflow = await loadWorkflow(QWEN_REFERENCE_WORKFLOW_PATH);
+      applyPromptFields(workflow, prompt, negative_prompt ?? "", aspect_ratio ?? "landscape");
 
       for (let i = 0; i < REFERENCE_LOAD_IMAGE_NODE_IDS.length; i++) {
         const path = referencePaths[i];
         const loadImageNodeId = REFERENCE_LOAD_IMAGE_NODE_IDS[i];
-        const scaleNodeId = REFERENCE_SCALE_NODE_IDS[i];
         const imageInputKey = `image${i + 1}`;
 
         if (path) {
           const uploaded = await uploadImageToComfyUI(path);
           workflow[loadImageNodeId].inputs.image = comfyImageRef(uploaded);
-          workflow[scaleNodeId].inputs.width = width;
-          workflow[scaleNodeId].inputs.height = height;
         } else {
-          // Leaves the LoadImage/ImageScale nodes in place but disconnected; ComfyUI
-          // only validates/executes nodes reachable from the SaveImage output, so an
-          // unused, unfilled-in LoadImage node is silently ignored rather than erroring.
+          // Drop the unused image slot from BOTH text-encode nodes; the now-unreachable
+          // LoadImage/FluxKontextImageScale nodes are pruned by ComfyUI.
           delete workflow[POSITIVE_PROMPT_NODE_ID].inputs[imageInputKey];
+          delete workflow[NEGATIVE_PROMPT_NODE_ID].inputs[imageInputKey];
         }
       }
 
-      return runWorkflowAndReturnMarkdown(workflow, ctl.getWorkingDirectory(), status, timeoutMs);
+      return runWorkflowAndReturnMarkdown(workflow, ctl.getWorkingDirectory(), status, QWEN_TIMEOUT_MS);
     }
   });
 
-  return [generateComfyUIImage, editComfyUIImage, referenceComfyUIImage];
+  return [qwenGenerateImage, qwenEditImage, qwenReferenceImage];
 }
