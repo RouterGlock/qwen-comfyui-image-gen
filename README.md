@@ -1,5 +1,8 @@
 # qwen-comfyui-image-gen
 
+[![GitHub repo](https://img.shields.io/badge/GitHub-qwen--comfyui--image--gen-blue?logo=github)](https://github.com/GrindSix/qwen-comfyui-image-gen)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 An LM Studio plugin that lets a local model (tested with Qwen) generate images
 by calling ComfyUI directly, no server or bridge process in between. Ask for
 an image in an LM Studio chat; the model expands your request into a
