@@ -195,13 +195,14 @@ async function downloadImageToLmStudioWorkingDir(
 async function runWorkflowAndReturnMarkdown(
   workflow: any,
   workingDirectory: string,
-  status: (message: string) => void
+  status: (message: string) => void,
+  timeoutMs = 300_000
 ): Promise<string> {
   status("Sending prompt to ComfyUI...");
   const promptId = await submitWorkflow(workflow);
 
   status("Waiting for ComfyUI image generation...");
-  const image = await waitForImage(promptId);
+  const image = await waitForImage(promptId, timeoutMs);
 
   status("Downloading generated image into LM Studio working directory...");
   const imageUrl = buildComfyUIImageUrl(image);
@@ -323,6 +324,11 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
       status("Uploading reference image(s) to ComfyUI...");
 
       const referencePaths = [image_path, image_path_2, image_path_3];
+      const imageCount = referencePaths.filter(Boolean).length;
+      // Each extra reference image adds a real amount of per-step compute (encoding it into
+      // reference latents, then attending over it at every sampling step) — one image stays
+      // well within the 300s default, but two images alone was observed pushing past it.
+      const timeoutMs = 300_000 + 200_000 * (imageCount - 1);
       const { width, height } = ASPECT_RATIOS[aspect_ratio ?? "square"];
 
       const workflow = await loadWorkflow(REFERENCE_WORKFLOW_PATH);
@@ -347,7 +353,7 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
         }
       }
 
-      return runWorkflowAndReturnMarkdown(workflow, ctl.getWorkingDirectory(), status);
+      return runWorkflowAndReturnMarkdown(workflow, ctl.getWorkingDirectory(), status, timeoutMs);
     }
   });
 
