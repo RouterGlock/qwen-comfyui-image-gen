@@ -14,6 +14,11 @@ Bundled to generate with **[Z-Image Turbo](https://huggingface.co/Tongyi-MAI/Z-I
 the workflow is a plain ComfyUI API-format JSON file — swap in your own to
 target a different checkpoint (see [Using a different model](#using-a-different-model)).
 
+![Example output: a small red robot watering a bonsai tree on a sunlit windowsill](docs/example.png)
+
+*Generated end-to-end through this plugin — prompt expanded by the LLM,
+rendered by Z-Image Turbo via ComfyUI, returned straight to the chat.*
+
 ## How it works
 
 - `src/toolsProvider.ts` registers a `generate_comfyui_image` tool. When
