@@ -1,6 +1,6 @@
 # qwen-comfyui-image-gen
 
-[![GitHub repo](https://img.shields.io/badge/GitHub-qwen--comfyui--image--gen-blue?logo=github)](https://github.com/GrindSix/qwen-comfyui-image-gen)
+[![GitHub repo](https://img.shields.io/badge/GitHub-qwen--comfyui--image--gen-blue?logo=github)](https://github.com/RouterGlock/qwen-comfyui-image-gen)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 An LM Studio plugin that lets a local model (tested with Qwen) generate,
