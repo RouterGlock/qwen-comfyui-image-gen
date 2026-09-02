@@ -37,11 +37,21 @@ your own to target a different checkpoint (see
 
 ![Example output: a small red robot watering a bonsai tree on a sunlit windowsill](docs/example.png)
 
-![Example edit: the same robot now wearing a blue hat](docs/edit-example.png)
+*`qwen_generate_image` — "a small red robot watering a bonsai tree on a
+sunlit windowsill", prompt expanded by the LLM, rendered by Qwen-Image via
+ComfyUI, returned straight to the chat.*
 
-*(Example images above were generated with the earlier Z-Image build; the
-flow — one-line request → LLM-expanded prompt → rendered inline in chat — is
-identical with the Qwen tools, just slower and cleaner.)*
+![Example edit: the same robot now wearing a blue wizard hat](docs/edit-example.png)
+
+*The image above, run through `qwen_edit_image` with "add a small blue
+wizard hat, keep everything else identical" — same scene, pose, and lighting,
+only the requested change.*
+
+![Example reference: the same robot on a rain-soaked neon-lit city street at night](docs/reference-example.png)
+
+*The first image used as a reference for `qwen_reference_image` with "the
+robot from the reference image, now on a rain-soaked neon-lit city street at
+night" — same robot, brand-new scene.*
 
 ## Video demo
 
