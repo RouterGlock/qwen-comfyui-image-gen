@@ -23,6 +23,12 @@ const EDIT_SCALE_NODE_ID = "11";
 const REFERENCE_LOAD_IMAGE_NODE_IDS = ["10", "14", "15"] as const;
 const REFERENCE_SCALE_NODE_IDS = ["11", "12", "13"] as const;
 
+const MARKDOWN_REPLY_RULE =
+  "This tool's result IS the literal chat reply, verbatim: your entire response must start with that exact " +
+  "markdown line, character for character. Do not wrap it in parentheses, backticks, or quotes; do not prefix " +
+  "it with \"Done —\" or a description of the image; do not reword, summarize, or describe the image in prose " +
+  "instead of showing it. You may add one short plain sentence after it on a new line.";
+
 const ASPECT_RATIOS = {
   square: { width: 1024, height: 1024 },
   landscape: { width: 1216, height: 832 },
@@ -218,8 +224,7 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
       "(no existing image involved). Use this when the user asks to create, draw, or generate an image " +
       "from scratch. Always pass a single, richly detailed, natural-language English prompt (subject, " +
       "environment, mood, lighting, style) rather than a short tag list or the user's raw request. " +
-      "This tool's result IS the literal chat reply: return it completely unchanged, with nothing added, " +
-      "removed, or reworded, and do not describe the image in prose instead.",
+      MARKDOWN_REPLY_RULE,
     parameters: {
       prompt: z.string().describe(
         "A detailed, natural-language English description of the desired image."
@@ -248,9 +253,8 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
       "change (e.g. 'change the background to a beach at sunset', 'make it black and white', 'add a hat'). " +
       "Uses ComfyUI (Z-Image Turbo's native edit conditioning). Use this when the user wants to modify a " +
       "specific image that already exists on disk — including a path this plugin returned earlier in the " +
-      "chat — rather than create something new. This tool's result IS the literal chat reply: return it " +
-      "completely unchanged, with nothing added, removed, or reworded, and do not describe the image in " +
-      "prose instead.",
+      "chat — rather than create something new. " +
+      MARKDOWN_REPLY_RULE,
     parameters: {
       image_path: z.string().describe("Absolute path to the existing image file to edit."),
       prompt: z.string().describe("A clear, natural-language description of the change to make to the image."),
@@ -287,9 +291,8 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
       "'combine the subject of the first image with the style of the second'). Uses ComfyUI (Z-Image " +
       "Turbo's native reference conditioning) to keep a subject, character, or style consistent while " +
       "generating something new — this is different from edit_comfyui_image, which modifies the reference " +
-      "image itself rather than creating a new composition inspired by it. This tool's result IS the " +
-      "literal chat reply: return it completely unchanged, with nothing added, removed, or reworded, and " +
-      "do not describe the image in prose instead.",
+      "image itself rather than creating a new composition inspired by it. " +
+      MARKDOWN_REPLY_RULE,
     parameters: {
       image_path: z.string().describe("Absolute path to the primary reference image."),
       image_path_2: z
