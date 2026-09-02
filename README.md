@@ -3,21 +3,36 @@
 [![GitHub repo](https://img.shields.io/badge/GitHub-qwen--comfyui--image--gen-blue?logo=github)](https://github.com/GrindSix/qwen-comfyui-image-gen)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An LM Studio plugin that lets a local model (tested with Qwen) generate images
-by calling ComfyUI directly, no server or bridge process in between. Ask for
-an image in an LM Studio chat; the model expands your request into a
-detailed prompt and calls a tool that submits it to ComfyUI, waits for the
-render, and drops the result back into the chat.
+An LM Studio plugin that lets a local model (tested with Qwen) generate,
+edit, and reference-guide images by calling ComfyUI directly, no server or
+bridge process in between. Ask for an image in an LM Studio chat; the model
+expands your request into a detailed prompt and calls a tool that submits it
+to ComfyUI, waits for the render, and drops the result back into the chat.
+
+Three tools, three presets:
+
+| Tool | Preset | Does |
+|---|---|---|
+| `generate_comfyui_image` | Image Director | Text-to-image, from scratch |
+| `edit_comfyui_image` | Image Editor | Modify an existing image file in place |
+| `reference_comfyui_image` | Image Reference | Generate a new image guided by 1-3 reference images |
 
 Bundled to generate with **[Z-Image Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo)**
-(a fast, distilled text-to-image model) using its Qwen3-4B text encoder, but
-the workflow is a plain ComfyUI API-format JSON file — swap in your own to
+(a fast, distilled text-to-image model) using its Qwen3-4B text encoder and
+its native `TextEncodeZImageOmni` conditioning node, which is what powers the
+edit and reference tools (no classic img2img/denoise pipeline needed). The
+workflows are plain ComfyUI API-format JSON files — swap in your own to
 target a different checkpoint (see [Using a different model](#using-a-different-model)).
 
 ![Example output: a small red robot watering a bonsai tree on a sunlit windowsill](docs/example.png)
 
-*Generated end-to-end through this plugin — prompt expanded by the LLM,
+*Generated with `generate_comfyui_image` — prompt expanded by the LLM,
 rendered by Z-Image Turbo via ComfyUI, returned straight to the chat.*
+
+![Example edit: the same robot now wearing a blue hat](docs/edit-example.png)
+
+*The image above, edited with `edit_comfyui_image` and the instruction "add a
+blue wizard hat" — same scene and pose, only the requested change applied.*
 
 ## Video demo
 
@@ -26,18 +41,32 @@ image in LM Studio chat through to it rendering back in) will go here.*
 
 ## How it works
 
-- `src/toolsProvider.ts` registers a `generate_comfyui_image` tool. When
-  called, it loads `workflow.json`, patches in your prompt/negative
-  prompt/resolution, POSTs it to ComfyUI's `/prompt` endpoint, polls
-  `/history/{id}` until the render finishes, downloads the image from
-  ComfyUI's `/view` endpoint into LM Studio's working directory, and returns
-  a markdown image reference so it renders inline in the chat.
+- `src/toolsProvider.ts` registers three tools — `generate_comfyui_image`,
+  `edit_comfyui_image`, and `reference_comfyui_image`. Each loads its own
+  workflow file (`workflow.json`, `workflow-edit.json`,
+  `workflow-reference.json`), patches in your prompt/negative
+  prompt/resolution (and, for edit/reference, uploads your source image(s)
+  to ComfyUI's `/upload/image` endpoint first), POSTs it to ComfyUI's
+  `/prompt` endpoint, polls `/history/{id}` until the render finishes,
+  downloads the image from ComfyUI's `/view` endpoint into LM Studio's
+  working directory, and returns a markdown image reference so it renders
+  inline in the chat.
+- Edit and reference both work by feeding the source image(s) directly into
+  Z-Image Turbo's `TextEncodeZImageOmni` conditioning node (alongside the
+  text prompt) rather than through a classic img2img/denoise pipeline — this
+  is the model's native way of doing image-guided generation. Each source
+  image is pre-resized with an explicit `ImageScale` node before that (with
+  the omni node's own `auto_resize_images` turned off) because letting the
+  omni node do the resizing itself can land on an odd internal latent size
+  and crash the sampler — see [Troubleshooting](#troubleshooting).
 - The **system prompt** is what actually makes this feel good to use: an
   LM model asked for an image tends to pass your raw one-liner straight
-  through, which most image models render poorly. A short system prompt (see
-  [Recommended system prompt](#recommended-system-prompt)) gets the model to
-  expand your request into the kind of detailed, natural-language prompt
-  Z-Image-style models respond to, before it calls the tool.
+  through, which most image models render poorly. A short system prompt per
+  tool (see [Recommended system prompts](#recommended-system-prompts)) gets
+  the model to expand your request into the kind of detailed, natural-language
+  prompt Z-Image-style models respond to, before it calls the tool — and to
+  reproduce the tool's returned markdown image line exactly, rather than
+  describing the image in prose instead.
 
 ## Prerequisites
 
@@ -102,46 +131,96 @@ before starting LM Studio (or export it in the shell `lms dev` runs from):
 export COMFYUI_URL="http://127.0.0.1:8188"
 ```
 
-In LM Studio, enable the `generate_comfyui_image` tool for your chat/model.
-Once you've confirmed it works, switch its tool-call permission to **Auto**
-so it doesn't ask for confirmation on every image.
+In LM Studio, enable whichever of the three tools you want
+(`generate_comfyui_image`, `edit_comfyui_image`, `reference_comfyui_image`)
+for your chat/model. Once you've confirmed each works, switch its tool-call
+permission to **Auto** so it doesn't ask for confirmation on every image.
 
-## Recommended system prompt
+Optionally, copy the matching preset(s) from `presets/` into LM Studio's
+preset folder so the recommended system prompt (below) is one click away
+instead of pasted in by hand:
 
-Pair this plugin with a system prompt (an LM Studio preset) that teaches the
-model to expand requests before calling the tool — otherwise it tends to pass
-your raw wording straight through, which produces flat, generic results.
-Something like:
+```bash
+cp presets/*.preset.json ~/.lmstudio/config-presets/
+```
+
+Then pick e.g. "Image Director (Z-Image ComfyUI)" from LM Studio's preset
+selector for a chat with `generate_comfyui_image` enabled.
+
+## Recommended system prompts
+
+Pair each tool with its own system prompt (an LM Studio preset) that teaches
+the model how to use it well — otherwise it tends to pass your raw wording
+straight through (flat, generic results) or narrate the tool's output in
+prose instead of actually showing the image. Something like:
+
+**For `generate_comfyui_image`:**
 
 > Before calling `generate_comfyui_image`, expand the user's request into a
 > single richly detailed, natural-language English prompt covering: subject,
 > setting/environment, mood/lighting, and style/execution. Use
 > `negative_prompt` only when something specific should be excluded. Pick
-> `aspect_ratio` (`square`/`landscape`/`portrait`) to match the subject.
+> `aspect_ratio` (`square`/`landscape`/`portrait`) to match the subject. The
+> tool's result is a single markdown image line — reproduce it exactly as
+> the start of your reply, then optionally one short sentence. Never
+> describe the image in prose instead of showing it.
+
+**For `edit_comfyui_image`:**
+
+> Get an exact file path to an existing image before calling
+> `edit_comfyui_image` — reuse one from earlier in the chat if there is one,
+> otherwise ask. Describe the change itself (e.g. "add a hat", "make it
+> black and white") rather than re-describing the whole image. As with
+> generation, reproduce the tool's returned markdown image line exactly.
+
+**For `reference_comfyui_image`:**
+
+> Get at least one exact file path to a reference image before calling
+> `reference_comfyui_image`. Describe the new scene/composition to
+> generate, and be explicit about what should carry over from each
+> reference (subject, style, palette) versus what should change. As with
+> generation, reproduce the tool's returned markdown image line exactly.
+
+This repo's `Image Director`/`Image Editor`/`Image Reference` presets
+(one per tool) implement these in full, plus a lower temperature than
+LM Studio's default — literal reproduction of the markdown line is more
+reliable at lower temperature, since it leaves less room for the model to
+paraphrase the tool's result instead of copying it.
 
 ## Using a different model
 
-`workflow.json` is a normal ComfyUI **API-format** export (Settings → enable
-Dev Mode → canvas menu → *Export (API)*, not the regular *Save*). To target a
-different checkpoint:
+`workflow.json` (and `workflow-edit.json`/`workflow-reference.json`) are
+normal ComfyUI **API-format** exports (Settings → enable Dev Mode → canvas
+menu → *Export (API)*, not the regular *Save*). To target a different
+checkpoint:
 
-1. Build and test the workflow manually in ComfyUI's own UI first.
-2. Export it in API format.
-3. Replace `workflow.json` with your export.
-4. Update the node IDs at the top of `src/toolsProvider.ts`
+1. Build and test the workflow manually in ComfyUI's own UI first, including
+   the image-conditioning path if your model supports edit/reference in a
+   similar way (or wire up classic img2img via `VAEEncode` + a `denoise` <
+   1.0 on `KSampler` if it doesn't).
+2. Export it in API format, once per tool you want to support.
+3. Replace `workflow.json`/`workflow-edit.json`/`workflow-reference.json`
+   with your exports.
+4. Update the node ID constants at the top of `src/toolsProvider.ts`
    (`POSITIVE_PROMPT_NODE_ID`, `NEGATIVE_PROMPT_NODE_ID`,
-   `LATENT_SIZE_NODE_ID`, `SEED_NODE_ID`) to match your graph — these are
-   just the numeric keys ComfyUI assigned your nodes on export.
+   `LATENT_SIZE_NODE_ID`, `SEED_NODE_ID`, and for edit/reference
+   `EDIT_LOAD_IMAGE_NODE_ID`/`EDIT_SCALE_NODE_ID`/
+   `REFERENCE_LOAD_IMAGE_NODE_IDS`/`REFERENCE_SCALE_NODE_IDS`) to match your
+   graph — these are just the numeric keys ComfyUI assigned your nodes on
+   export.
 5. Adjust `ASPECT_RATIOS` in the same file to sane sizes/step for your
-   model's native resolution.
+   model's native resolution — keep them multiples of 16, not just 8 (see
+   Troubleshooting below for why).
 
 ## Troubleshooting
 
 | Symptom | Likely cause |
 |---|---|
-| `ComfyUI /prompt failed: ... node_errors` | `workflow.json` doesn't match the models actually installed in ComfyUI, or the node IDs in `toolsProvider.ts` don't match the workflow. |
-| Tool call hangs, then times out after 3 minutes | ComfyUI isn't reachable at `COMFYUI_URL`, or the model is still loading on first run. |
+| `ComfyUI /prompt failed: ... node_errors` | A workflow file doesn't match the models actually installed in ComfyUI, or the node IDs in `toolsProvider.ts` don't match the workflow. |
+| Tool call hangs, then times out after 3 minutes | ComfyUI isn't reachable at `COMFYUI_URL`, or the model is still loading on first run. Edit/reference generations also take noticeably longer than plain generation — budget more time before assuming it's stuck. |
 | Image never appears in chat | Check LM Studio's working directory is writable; the returned markdown path must point somewhere LM Studio can read. |
+| Reply shows a bare `(path/to/image.png)` instead of the image | The model reworded the tool's markdown result instead of copying it verbatim — a model-following issue, not a plugin bug (the tool's return value is nothing but the markdown line already). Lower the preset's temperature, and make sure the system prompt's "reproduce the markdown line exactly" instruction is actually loaded for that chat. |
+| `edit_comfyui_image`/`reference_comfyui_image` crash with a `RuntimeError: shape '[...]' is invalid for input of size ...` | Z-Image Turbo's own image-resizing (`auto_resize_images` on `TextEncodeZImageOmni`) can round a source image to a latent size that isn't evenly divisible into its 2×2 patches. Both bundled workflows work around this by resizing with an explicit `ImageScale` node to dimensions that are multiples of 16 first, with `auto_resize_images` turned off — if you build your own edit/reference workflow, keep that pattern. |
 
 ## License
 
