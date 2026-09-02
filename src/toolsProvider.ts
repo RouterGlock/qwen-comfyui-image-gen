@@ -123,7 +123,7 @@ async function getHistory(promptId: string): Promise<any> {
   return response.json();
 }
 
-async function waitForImage(promptId: string, timeoutMs = 180_000): Promise<ComfyImageResult> {
+async function waitForImage(promptId: string, timeoutMs = 300_000): Promise<ComfyImageResult> {
   const startedAt = Date.now();
 
   while (true) {
