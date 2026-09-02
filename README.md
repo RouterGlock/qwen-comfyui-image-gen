@@ -19,6 +19,11 @@ target a different checkpoint (see [Using a different model](#using-a-different-
 *Generated end-to-end through this plugin — prompt expanded by the LLM,
 rendered by Z-Image Turbo via ComfyUI, returned straight to the chat.*
 
+## Video demo
+
+*Coming soon — a short screen recording of the full flow (asking for an
+image in LM Studio chat through to it rendering back in) will go here.*
+
 ## How it works
 
 - `src/toolsProvider.ts` registers a `generate_comfyui_image` tool. When
