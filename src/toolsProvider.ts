@@ -78,6 +78,15 @@ type UploadedImage = {
 // that file off disk and POST it to ComfyUI, which then serves it back over
 // /view — an arbitrary-file-read/exfil primitive. Every caller path is funnelled
 // through safeImagePath() first.
+//
+// The gate is deliberately loose: it allows anything under the user's home
+// directory (so drag-and-drop from Downloads / Desktop / Documents / Pictures /
+// any project folder, plus LM Studio's own ~/.lmstudio/user-files copy of a
+// dropped image, all just work), plus mounted volumes and the system temp dirs.
+// It still blocks reads from system locations outside $HOME (/etc, another
+// user's home, ...), enforces an image extension, and caps the file size.
+// Set QWEN_ALLOWED_IMAGE_DIRS (":"-separated, "~" ok) to add more roots, or set
+// it to "/" to allow any absolute path.
 
 const IMAGE_EXTS = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tif", ".tiff"]);
 const MAX_INPUT_IMAGE_BYTES = 64 * 1024 * 1024;
@@ -89,19 +98,20 @@ function expandHome(p: string): string {
 }
 
 // Real (symlink-resolved) directories a caller image path may live under.
-// Extend with QWEN_ALLOWED_IMAGE_DIRS (":"-separated, "~" ok).
 function allowedImageRoots(workingDirectory: string): string[] {
+  const extra = (process.env.QWEN_ALLOWED_IMAGE_DIRS ?? "")
+    .split(":")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map(expandHome);
   const candidates = [
     workingDirectory,
-    join(homedir(), "Desktop"),
-    join(homedir(), "Downloads"),
-    join(homedir(), "Pictures"),
-    join(homedir(), "Documents"),
-    ...(process.env.QWEN_ALLOWED_IMAGE_DIRS ?? "")
-      .split(":")
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map(expandHome)
+    homedir(), // covers Downloads, Desktop, Documents, Pictures, ~/.lmstudio/user-files, projects, ...
+    "/Volumes", // external / network drives
+    "/tmp",
+    "/private/tmp",
+    "/private/var/folders", // macOS per-user temp (where some apps stage a drag)
+    ...extra
   ];
   const roots: string[] = [];
   for (const c of candidates) {
@@ -138,13 +148,16 @@ function safeImagePath(input: string, workingDirectory: string): string {
       `Unsupported image type "${extname(real) || "(none)"}". Allowed: ${[...IMAGE_EXTS].join(", ")}`
     );
   }
-  const roots = allowedImageRoots(workingDirectory);
-  if (!roots.some((root) => real === root || real.startsWith(root + sep))) {
-    throw new Error(
-      `Refusing to read "${input}": outside the allowed image folders (LM Studio working ` +
-        `directory, ~/Desktop, ~/Downloads, ~/Pictures, ~/Documents). ` +
-        `Set QWEN_ALLOWED_IMAGE_DIRS to allow another location.`
-    );
+  const allowAny = (process.env.QWEN_ALLOWED_IMAGE_DIRS ?? "").split(":").map((s) => s.trim()).includes("/");
+  if (!allowAny) {
+    const roots = allowedImageRoots(workingDirectory);
+    if (!roots.some((root) => real === root || real.startsWith(root + sep))) {
+      throw new Error(
+        `Refusing to read "${input}": it resolves to ${real}, which is outside your home directory, ` +
+          `mounted volumes, and the temp dirs. Move the image somewhere under your home folder, or set ` +
+          `QWEN_ALLOWED_IMAGE_DIRS (":"-separated, or "/" to allow anywhere).`
+      );
+    }
   }
   return real;
 }
@@ -454,7 +467,12 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
       "path plus an instruction describing the change and what to preserve. " +
       MARKDOWN_REPLY_RULE,
     parameters: {
-      image_path: z.string().describe("Absolute path to the existing image file to restyle."),
+      image_path: z
+        .string()
+        .describe(
+          "Absolute path to the existing image file to restyle. If the user dragged/pasted an image into " +
+            "the chat, its path is given to you in an '[Attached image file path]' note — pass that exact string."
+        ),
       prompt: z
         .string()
         .describe("Instruction: the target art style plus what to keep (people, poses, framing, background)."),
@@ -494,7 +512,12 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
       "(~2-4 min) — different from qwen_edit_image, which modifies the source image itself. " +
       MARKDOWN_REPLY_RULE,
     parameters: {
-      image_path: z.string().describe("Absolute path to the primary reference image."),
+      image_path: z
+        .string()
+        .describe(
+          "Absolute path to the primary reference image. If the user dragged/pasted images into the chat, " +
+            "their paths are listed in an '[Attached image file path]' note — pass those exact strings."
+        ),
       image_path_2: z.string().optional().describe("Absolute path to a second reference image, if using more than one."),
       image_path_3: z.string().optional().describe("Absolute path to a third reference image, if using more than one."),
       prompt: z
