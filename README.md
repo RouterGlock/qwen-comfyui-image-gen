@@ -51,6 +51,14 @@ image in LM Studio chat through to it rendering back in) will go here.*
   downloads the image from ComfyUI's `/view` endpoint into LM Studio's
   working directory, and returns a markdown image reference so it renders
   inline in the chat.
+- **Autostart:** before doing any of that, each tool pings ComfyUI's
+  `/system_stats`. If it's unreachable *and* `COMFYUI_URL` is a local
+  address, the plugin spawns the launcher script (detached, so the server
+  keeps running for later images) and waits up to 240s for it to come up,
+  then proceeds. So you don't have to start ComfyUI yourself — a cold
+  machine just means the first image takes a couple minutes longer. See
+  [Autostart](#autostart) for the knobs and [Troubleshooting](#troubleshooting)
+  for what its failure modes look like.
 - Edit and reference both work by feeding the source image(s) directly into
   Z-Image Turbo's `TextEncodeZImageOmni` conditioning node (alongside the
   text prompt) rather than through a classic img2img/denoise pipeline — this
@@ -130,6 +138,27 @@ before starting LM Studio (or export it in the shell `lms dev` runs from):
 ```bash
 export COMFYUI_URL="http://127.0.0.1:8188"
 ```
+
+### Autostart
+
+If ComfyUI isn't running when a tool fires, the plugin starts it for you
+instead of failing with `fetch failed`. This only happens when:
+
+- `COMFYUI_URL` points at a local address (`127.0.0.1`, `localhost`,
+  `0.0.0.0`, `[::1]`) — a remote ComfyUI is never touched; and
+- the launcher script exists. It defaults to
+  `~/ComfyUI-Installs/run-comfyui-optimized.sh`; override with
+  `COMFYUI_LAUNCHER=/path/to/your/launch-script.sh`.
+
+The plugin spawns the launcher detached (so the server outlives the tool
+call and serves subsequent images), polls `/system_stats` for up to 240s,
+then continues with the render. Startup output is appended to
+`<ComfyUI-Installs>/ComfyUI/logs/plugin-autostart.log`. When neither
+condition holds, the tool just proceeds and you get the original
+connection error.
+
+To turn autostart off, point `COMFYUI_LAUNCHER` at a path that doesn't
+exist.
 
 In LM Studio, enable whichever of the three tools you want
 (`generate_comfyui_image`, `edit_comfyui_image`, `reference_comfyui_image`)
@@ -217,7 +246,10 @@ checkpoint:
 | Symptom | Likely cause |
 |---|---|
 | `ComfyUI /prompt failed: ... node_errors` | A workflow file doesn't match the models actually installed in ComfyUI, or the node IDs in `toolsProvider.ts` don't match the workflow. |
-| Tool call hangs, then times out (5 min for generate/edit; 5-9 min for reference, scaling with reference image count) | ComfyUI isn't reachable at `COMFYUI_URL`, or the model is still loading on first run. Each reference image adds real per-step compute (it's encoded into conditioning and attended to at every sampling step), which is why `reference_comfyui_image` scales its timeout up automatically as more `image_path_*` params are used. On slower hardware even that may not be enough — raise the base `300_000`/`200_000` constants in the `generateComfyUIImage`/`editComfyUIImage`/`referenceComfyUIImage` implementations in `src/toolsProvider.ts` if so. Note ComfyUI itself keeps rendering even after the plugin's own wait times out — it isn't wasted work, just a result the tool call didn't wait around for. |
+| First image after a reboot sits on `Waiting for ComfyUI to finish starting...` for a minute or two | Expected — [autostart](#autostart) is cold-starting ComfyUI for you. A fully cold start (evicted disk cache + ComfyUI-Manager's registry fetch + first model load) has been seen to take past two minutes on Apple Silicon; a warm restart is a few seconds. It proceeds to the render automatically once the server answers. |
+| Tool call fails fast with `Launched ComfyUI via <path> but it was still not reachable at <url> after 240s` | The cold start ran past autostart's wait window. The server is almost certainly up by now — just call the tool again. If it recurs, check `<ComfyUI-Installs>/ComfyUI/logs/plugin-autostart.log` for a startup error (bad launcher, port already taken by a wedged process, missing custom node), and if the machine is simply slow, raise the `240_000` budget in `startComfyUIOnce` in `src/toolsProvider.ts`. |
+| Still get a bare `fetch failed` with no `starting it...` status | Autostart didn't engage: either `COMFYUI_URL` isn't a recognized local address, or the launcher script doesn't exist. Point `COMFYUI_LAUNCHER` at a real script, or start ComfyUI yourself. See [Autostart](#autostart). |
+| Tool call hangs, then times out (5 min for generate/edit; 5-9 min for reference, scaling with reference image count) | The render itself is taking longer than the plugin's wait. ComfyUI is reachable (autostart got that far or it was already up) but the model may still be loading on first run, or the hardware is slow. Each reference image adds real per-step compute (it's encoded into conditioning and attended to at every sampling step), which is why `reference_comfyui_image` scales its timeout up automatically as more `image_path_*` params are used. On slower hardware even that may not be enough — raise the base `300_000`/`200_000` constants in the `generateComfyUIImage`/`editComfyUIImage`/`referenceComfyUIImage` implementations in `src/toolsProvider.ts` if so. Note ComfyUI itself keeps rendering even after the plugin's own wait times out — it isn't wasted work, just a result the tool call didn't wait around for. |
 | Image never appears in chat | Check LM Studio's working directory is writable; the returned markdown path must point somewhere LM Studio can read. |
 | Reply shows a bare `(path/to/image.png)`, or a parenthetical summary like `(Done — a robot on a windowsill. The image is at ` /path` .)`, instead of the image | The model reworded the tool's markdown result instead of copying it verbatim — a model-following issue, not a plugin bug (the tool's return value is nothing but the markdown line already). This repo's presets already carry an explicit "do not wrap it in parentheses/backticks" rule with a real worked wrong-vs-right example and a fairly low temperature (0.4); if it still happens, lower the preset's temperature further, confirm the right preset is actually loaded for that chat, and note this is more likely on smaller/quantized local models than on larger ones. |
 | `edit_comfyui_image`/`reference_comfyui_image` crash with a `RuntimeError: shape '[...]' is invalid for input of size ...` | Z-Image Turbo's own image-resizing (`auto_resize_images` on `TextEncodeZImageOmni`) can round a source image to a latent size that isn't evenly divisible into its 2×2 patches. Both bundled workflows work around this by resizing with an explicit `ImageScale` node to dimensions that are multiples of 16 first, with `auto_resize_images` turned off — if you build your own edit/reference workflow, keep that pattern. |
