@@ -1,0 +1,17 @@
+{
+  "name": "qwen-comfyui-image-gen",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "dev": "lms dev"
+  },
+  "dependencies": {
+    "@lmstudio/sdk": "latest",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "typescript": "latest"
+  }
+}
