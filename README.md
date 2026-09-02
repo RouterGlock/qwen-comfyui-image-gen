@@ -164,6 +164,18 @@ before starting LM Studio (or export it in the shell `lms dev` runs from):
 export COMFYUI_URL="http://127.0.0.1:8188"
 ```
 
+### Where source images are read from
+
+`qwen_edit_image` / `qwen_reference_image` only read an `image_path` that is an image
+file inside the LM Studio working directory, `~/Desktop`, `~/Downloads`, `~/Pictures`,
+`~/Documents`, or a `:`-separated directory listed in `QWEN_ALLOWED_IMAGE_DIRS`. This
+stops a prompt-injected model from pointing the tool at an arbitrary local file and
+having it uploaded to ComfyUI.
+
+```bash
+export QWEN_ALLOWED_IMAGE_DIRS="$HOME/renders:$HOME/work/assets"
+```
+
 In LM Studio, enable whichever of the three tools you want
 (`qwen_generate_image`, `qwen_edit_image`, `qwen_reference_image`) for your
 chat/model. Once you've confirmed each works, switch its tool-call

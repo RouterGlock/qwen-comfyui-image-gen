@@ -1,10 +1,10 @@
 import { tool, Tool, ToolsProviderController } from "@lmstudio/sdk";
 import { z } from "zod";
 import { readFile, writeFile } from "node:fs/promises";
-import { existsSync, openSync } from "node:fs";
+import { existsSync, openSync, realpathSync, statSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { homedir } from "node:os";
-import { join, basename } from "node:path";
+import { join, basename, extname, resolve, sep } from "node:path";
 
 const COMFYUI_URL = process.env.COMFYUI_URL ?? "http://127.0.0.1:8188";
 
@@ -71,6 +71,83 @@ type UploadedImage = {
   subfolder: string;
   type: string;
 };
+
+// ---- caller-supplied path safety ----------------------------------------
+// image_path / image_path_2 / image_path_3 come straight from the model, and a
+// prompt injection can put any path there. Without a gate the tool would read
+// that file off disk and POST it to ComfyUI, which then serves it back over
+// /view — an arbitrary-file-read/exfil primitive. Every caller path is funnelled
+// through safeImagePath() first.
+
+const IMAGE_EXTS = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tif", ".tiff"]);
+const MAX_INPUT_IMAGE_BYTES = 64 * 1024 * 1024;
+
+function expandHome(p: string): string {
+  if (p === "~") return homedir();
+  if (p.startsWith("~/") || p.startsWith("~\\")) return join(homedir(), p.slice(2));
+  return p;
+}
+
+// Real (symlink-resolved) directories a caller image path may live under.
+// Extend with QWEN_ALLOWED_IMAGE_DIRS (":"-separated, "~" ok).
+function allowedImageRoots(workingDirectory: string): string[] {
+  const candidates = [
+    workingDirectory,
+    join(homedir(), "Desktop"),
+    join(homedir(), "Downloads"),
+    join(homedir(), "Pictures"),
+    join(homedir(), "Documents"),
+    ...(process.env.QWEN_ALLOWED_IMAGE_DIRS ?? "")
+      .split(":")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map(expandHome)
+  ];
+  const roots: string[] = [];
+  for (const c of candidates) {
+    try {
+      roots.push(realpathSync(resolve(c)));
+    } catch {
+      /* skip roots that don't exist */
+    }
+  }
+  return roots;
+}
+
+function safeImagePath(input: string, workingDirectory: string): string {
+  if (typeof input !== "string" || !input.trim()) {
+    throw new Error("image path is required");
+  }
+  let real: string;
+  try {
+    real = realpathSync(resolve(expandHome(input.trim())));
+  } catch {
+    throw new Error(`Image not found: ${input}`);
+  }
+  const st = statSync(real);
+  if (!st.isFile()) {
+    throw new Error(`Not a regular file: ${input}`);
+  }
+  if (st.size > MAX_INPUT_IMAGE_BYTES) {
+    throw new Error(
+      `Image is ${(st.size / 1048576).toFixed(1)} MB, over the ${MAX_INPUT_IMAGE_BYTES / 1048576} MB limit.`
+    );
+  }
+  if (!IMAGE_EXTS.has(extname(real).toLowerCase())) {
+    throw new Error(
+      `Unsupported image type "${extname(real) || "(none)"}". Allowed: ${[...IMAGE_EXTS].join(", ")}`
+    );
+  }
+  const roots = allowedImageRoots(workingDirectory);
+  if (!roots.some((root) => real === root || real.startsWith(root + sep))) {
+    throw new Error(
+      `Refusing to read "${input}": outside the allowed image folders (LM Studio working ` +
+        `directory, ~/Desktop, ~/Downloads, ~/Pictures, ~/Documents). ` +
+        `Set QWEN_ALLOWED_IMAGE_DIRS to allow another location.`
+    );
+  }
+  return real;
+}
 
 async function loadWorkflow(path: string): Promise<any> {
   const raw = await readFile(path, "utf-8");
@@ -218,7 +295,7 @@ async function submitWorkflow(workflow: any): Promise<string> {
 }
 
 async function getHistory(promptId: string): Promise<any> {
-  const response = await fetch(`${COMFYUI_URL}/history/${promptId}`);
+  const response = await fetch(`${COMFYUI_URL}/history/${encodeURIComponent(promptId)}`);
 
   if (!response.ok) {
     return null;
@@ -282,7 +359,12 @@ async function downloadImageToLmStudioWorkingDir(
 
   const bytes = new Uint8Array(await response.arrayBuffer());
 
-  const safeFilename = `${Date.now()}-${basename(originalFilename)}`;
+  // basename() strips any path from ComfyUI's reported filename; then keep only a
+  // conservative charset and force an image extension so the write target stays a
+  // plain file directly inside workingDirectory.
+  const stripped = basename(originalFilename).replace(/[^A-Za-z0-9._-]/g, "_");
+  const ext = IMAGE_EXTS.has(extname(stripped).toLowerCase()) ? "" : ".png";
+  const safeFilename = `${Date.now()}-${stripped || "image"}${ext}`;
   const filePath = join(workingDirectory, safeFilename);
 
   await writeFile(filePath, bytes);
@@ -389,7 +471,7 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
       await ensureComfyUIReady(status);
 
       status("Uploading source image to ComfyUI...");
-      const uploaded = await uploadImageToComfyUI(image_path);
+      const uploaded = await uploadImageToComfyUI(safeImagePath(image_path, ctl.getWorkingDirectory()));
 
       const workflow = await loadWorkflow(QWEN_EDIT_WORKFLOW_PATH);
       applyPromptFields(workflow, prompt, negative_prompt ?? "", aspect_ratio ?? "landscape");
@@ -445,7 +527,7 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
         const imageInputKey = `image${i + 1}`;
 
         if (path) {
-          const uploaded = await uploadImageToComfyUI(path);
+          const uploaded = await uploadImageToComfyUI(safeImagePath(path, ctl.getWorkingDirectory()));
           workflow[loadImageNodeId].inputs.image = comfyImageRef(uploaded);
         } else {
           // Drop the unused image slot from BOTH text-encode nodes; the now-unreachable
