@@ -1,9 +1,29 @@
 import { tool, Tool, ToolsProviderController } from "@lmstudio/sdk";
 import { z } from "zod";
 import { readFile, writeFile } from "node:fs/promises";
+import { existsSync, openSync } from "node:fs";
+import { spawn } from "node:child_process";
+import { homedir } from "node:os";
 import { join, basename } from "node:path";
 
 const COMFYUI_URL = process.env.COMFYUI_URL ?? "http://127.0.0.1:8188";
+
+// If ComfyUI isn't running when a tool fires, we spawn this launcher and wait for
+// it rather than returning "fetch failed". Override with COMFYUI_LAUNCHER; only
+// used when COMFYUI_URL is a local address (never try to "start" a remote box).
+const COMFYUI_LAUNCHER =
+  process.env.COMFYUI_LAUNCHER ??
+  join(homedir(), "ComfyUI-Installs", "run-comfyui-optimized.sh");
+const COMFYUI_START_LOG = join(
+  homedir(),
+  "ComfyUI-Installs",
+  "ComfyUI",
+  "logs",
+  "plugin-autostart.log"
+);
+const COMFYUI_IS_LOCAL = /^https?:\/\/(127\.0\.0\.1|localhost|0\.0\.0\.0|\[::1\])(:|\/|$)/.test(
+  COMFYUI_URL
+);
 
 // Workflow files live at the plugin root; this file runs from dist/ once built.
 const GENERATE_WORKFLOW_PATH = join(__dirname, "..", "workflow.json");
@@ -52,6 +72,87 @@ type UploadedImage = {
 async function loadWorkflow(path: string): Promise<any> {
   const raw = await readFile(path, "utf-8");
   return JSON.parse(raw);
+}
+
+async function comfyUIIsUp(timeoutMs = 2_000): Promise<boolean> {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const res = await fetch(`${COMFYUI_URL}/system_stats`, { signal: ctrl.signal });
+      return res.ok;
+    } finally {
+      clearTimeout(timer);
+    }
+  } catch {
+    return false;
+  }
+}
+
+// One in-flight start per plugin process: concurrent tool calls await the same
+// launch instead of each spawning a server that then fails to bind port 8188.
+let comfyStartInFlight: Promise<void> | null = null;
+
+async function startComfyUIOnce(status: (message: string) => void): Promise<void> {
+  if (!comfyStartInFlight) {
+    comfyStartInFlight = (async () => {
+      status("ComfyUI is not responding — starting it...");
+
+      let stdio: "ignore" | ["ignore", number, number] = "ignore";
+      try {
+        const fd = openSync(COMFYUI_START_LOG, "a");
+        stdio = ["ignore", fd, fd];
+      } catch {
+        // logs dir not present yet — run without capturing output
+      }
+
+      const child = spawn("/bin/zsh", [COMFYUI_LAUNCHER], { detached: true, stdio });
+      child.unref();
+
+      // A fully cold start (evicted disk cache + ComfyUI-Manager's registry
+      // fetches + first model load) has been seen to take past 2 minutes on
+      // this hardware; give it a generous budget before giving up.
+      const deadlineMs = Date.now() + 240_000;
+      while (Date.now() < deadlineMs) {
+        await new Promise((resolve) => setTimeout(resolve, 2_000));
+        if (await comfyUIIsUp()) {
+          status("ComfyUI is up.");
+          return;
+        }
+        status("Waiting for ComfyUI to finish starting...");
+      }
+
+      throw new Error(
+        `Launched ComfyUI via ${COMFYUI_LAUNCHER} but it was still not reachable at ${COMFYUI_URL} ` +
+          `after 240s. It may just need a little longer on a cold start — retry in a moment. ` +
+          `If it keeps failing, check ${COMFYUI_START_LOG}.`
+      );
+    })();
+  }
+
+  try {
+    await comfyStartInFlight;
+  } finally {
+    comfyStartInFlight = null;
+  }
+}
+
+/**
+ * Run at the top of every tool. A ~cheap no-op when ComfyUI is already reachable;
+ * otherwise it spawns the tuned launcher detached (so the server outlives this
+ * tool call and serves later images too) and waits for it to answer before the
+ * tool proceeds. Net effect: a cold machine makes the first image take ~30-60s
+ * longer instead of failing with "fetch failed".
+ */
+async function ensureComfyUIReady(status: (message: string) => void): Promise<void> {
+  if (await comfyUIIsUp()) return;
+
+  // A remote/unrecognized COMFYUI_URL isn't ours to start, and a missing launcher
+  // means there's nothing to run — in both cases fall through and let the real
+  // request fail with its own, more specific error.
+  if (!COMFYUI_IS_LOCAL || !existsSync(COMFYUI_LAUNCHER)) return;
+
+  await startComfyUIOnce(status);
 }
 
 function applyPromptFields(
@@ -240,6 +341,8 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
         .describe("Image shape. Defaults to square (1024x1024).")
     },
     implementation: async ({ prompt, negative_prompt, aspect_ratio }, { status }) => {
+      await ensureComfyUIReady(status);
+
       const workflow = await loadWorkflow(GENERATE_WORKFLOW_PATH);
       applyPromptFields(workflow, prompt, negative_prompt ?? "", aspect_ratio ?? "square");
 
@@ -269,6 +372,8 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
         .describe("Output shape. Defaults to square; pick the one matching the source image when known.")
     },
     implementation: async ({ image_path, prompt, negative_prompt, aspect_ratio }, { status }) => {
+      await ensureComfyUIReady(status);
+
       status("Uploading source image to ComfyUI...");
       const uploaded = await uploadImageToComfyUI(image_path);
 
@@ -321,6 +426,8 @@ export async function toolsProvider(ctl: ToolsProviderController): Promise<Tool[
       { image_path, image_path_2, image_path_3, prompt, negative_prompt, aspect_ratio },
       { status }
     ) => {
+      await ensureComfyUIReady(status);
+
       status("Uploading reference image(s) to ComfyUI...");
 
       const referencePaths = [image_path, image_path_2, image_path_3];
