@@ -270,6 +270,44 @@ pipeline.
 | Image never appears in chat | Check LM Studio's working directory is writable; the returned markdown path must point somewhere LM Studio can read. |
 | Reply shows a bare `(path/to/image.png)`, or a parenthetical summary like `(Done — a robot on a windowsill. The image is at ` /path` .)`, instead of the image | The model reworded the tool's markdown result instead of copying it verbatim — a model-following issue, not a plugin bug (the tool's return value is nothing but the markdown line already). This repo's presets already carry an explicit "do not wrap it in parentheses/backticks" rule with a real worked wrong-vs-right example and a fairly low temperature (0.4); if it still happens, lower the preset's temperature further, confirm the right preset is actually loaded for that chat, and note this is more likely on smaller/quantized local models than on larger ones. |
 
+## Changelog
+
+Newest first. Dates are when the change landed on `main`.
+
+### 2026-09-03
+
+- **Stop telling a sighted model it can't see attached images.** The prompt
+  preprocessor's note now leads with "you can see this image directly through
+  vision — answer normally" and marks the on-disk path as needed *only* for a
+  `qwen_edit_image` / `qwen_reference_image` call. The previous wording ("the
+  user attached an image … pass this exact string as `image_path`") made
+  vision-capable models insist they couldn't see the picture, breaking plain
+  "what's in this image?", OCR, and describe requests. Non-image attachments
+  (PDFs, etc.) are still passed straight through untouched, so this plugin and a
+  document-RAG plugin can both be enabled in the same chat.
+
+### 2026-09-02
+
+- **Switched the backend from Z-Image Turbo to Qwen-Image** — `qwen_generate_image`
+  / `qwen_edit_image` / `qwen_reference_image`, the last two using
+  Qwen-Image-Edit-2511's native multi-image conditioning. Old Z-Image workflows
+  archived in `z-image-archive/`.
+- **Reach images dragged or pasted into the chat:** added the prompt preprocessor
+  that resolves each attached image to its on-disk path (LM Studio's own copy
+  under `~/.lmstudio/user-files/`) so the model can hand it to the edit/reference
+  tools instead of guessing a path.
+- **Gated caller-supplied `image_path` args** through `safeImagePath()` — must
+  resolve to a regular image ≤64 MiB inside an allowed root (LM Studio working
+  dir, `~/Desktop`, `~/Downloads`, `~/Pictures`, `~/Documents`, `/Volumes`,
+  system temp, or `QWEN_ALLOWED_IMAGE_DIRS`; set it to `/` to disable the check).
+  Closes an arbitrary-file-read / exfil path through ComfyUI's `/view`.
+- **Auto-start ComfyUI** on a tool call when it isn't running; raised and scaled
+  the render-wait timeouts for the edit and reference tools.
+- **Strengthened the anti-paraphrase rule** in the presets after a real-world
+  failure — the model must reproduce the tool's markdown image line verbatim.
+- Initial release: LM Studio plugin driving a local Qwen model → ComfyUI, no
+  bridge process in between.
+
 ## License
 
 MIT
