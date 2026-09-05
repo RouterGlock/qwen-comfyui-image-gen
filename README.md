@@ -310,4 +310,4 @@ Newest first. Dates are when the change landed on `main`.
 
 ## License
 
-MIT
+MIT © 2026 RouterGlock — see [LICENSE](LICENSE).
