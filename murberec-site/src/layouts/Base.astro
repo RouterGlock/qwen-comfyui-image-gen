@@ -19,8 +19,12 @@ interface Props {
   noindex?: boolean;
 }
 
-const { title, description, crumbs = [], schema = [], noindex = false } = Astro.props;
-const canonical = new URL(Astro.url.pathname.replace(/\/$/, '') || '/', site.url).href;
+const { title, description, crumbs = [], schema = [], noindex: noindexPage = false } = Astro.props;
+// A subfolder preview build (BASE_PATH) is private: never indexed, and its
+// canonical URLs still point at murberec.com.
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const noindex = noindexPage || base !== '';
+const canonical = new URL(Astro.url.pathname.replace(base, '').replace(/\/$/, '') || '/', site.url).href;
 const fullTitle = crumbs.length ? `${title} | ${site.name}` : title;
 const ogImage = new URL('/og.png', site.url).href;
 
@@ -73,12 +77,12 @@ const jsonLd = [org, breadcrumbs, ...schema].filter(Boolean);
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex" />}
+    {noindex && <meta name="robots" content={base ? 'noindex, nofollow' : 'noindex'} />}
     <meta name="theme-color" content="#09090b" />
     <link rel="preload" href={manropeLatin} as="font" type="font/woff2" crossorigin />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    {!base && <link rel="sitemap" href="/sitemap-index.xml" />}
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.name} />
