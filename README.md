@@ -1,7 +1,7 @@
 # qwen-comfyui-image-gen
 
 [![GitHub repo](https://img.shields.io/badge/GitHub-qwen--comfyui--image--gen-blue?logo=github)](https://github.com/RouterGlock/qwen-comfyui-image-gen)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 An LM Studio plugin that lets a local model (tested with Qwen) generate,
 edit, and reference-guide images by calling ComfyUI directly, no server or
@@ -310,4 +310,4 @@ Newest first. Dates are when the change landed on `main`.
 
 ## License
 
-MIT © 2026 RouterGlock — see [LICENSE](LICENSE).
+Apache 2.0 © 2026 Project Jail Cell, Inc. — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
