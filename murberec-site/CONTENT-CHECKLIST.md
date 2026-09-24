@@ -31,7 +31,7 @@ Almost everything lives in **`src/data/site.ts`**. Search the repo for
 | 12 | ~~Xtudio triptych~~ Done: all 3 clips rendered and live on the Xtudio page | `xtudio-reel/`, `public/xtudio/` | |
 | 12b | **Xtudio reel videos** (poster image + video file/URL each) | `reels` array in `src/pages/xtudio.astro`. Replaces the "request the reel" block and the old "01 / FILM" placeholders. |
 | 13 | **Social profile URLs** (LinkedIn etc.) | `site.ts` → `social` |
-| 14 | **MURBEREC® logo**: Marc wants a new mark (the current rainbow loop reads too much like Meta). Concepts: `brand-logo/` (Qwen-Image). The Xtudio logo is redrawn; an original vector would be even better | `brand-logo/`, `Nav.astro`, `public/favicon.svg` |
+| 14 | **MURBEREC® logo**: new "synapse M" mark chosen by Marc (concept 1, take 4) and redrawn as vector. It's in the nav, favicon, home-screen icon, link-preview image and structured data. Final files: `brand-logo/final/` (SVG, light/dark). Still a candidate: re-run concepts if he wants to explore further. The Xtudio logo is redrawn; an original vector would be even better | `brand-logo/final/`, `public/brand/` |
 | 15 | **Founder / team** section, if wanted on About | `src/pages/about.astro` |
 
 ## Audit fixes already done
