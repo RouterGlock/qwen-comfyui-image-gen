@@ -8,7 +8,7 @@ export const site = {
   name: 'MURBEREC®',
   shortName: 'MURBEREC',
   url: 'https://murberec.com',
-  tagline: 'People-first consulting, grounded in neuroscience.',
+  tagline: 'People-first consulting for organizations ready to grow with intention.',
   description:
     'MURBEREC® is a people-first consulting firm that uses neuroscience to design leadership development, learning experiences, change management and products that stick. No templates, no playbooks.',
 
@@ -23,8 +23,8 @@ export const site = {
   },
   // TODO(owner): real phone number. The old one was a fictional 555 number.
   phone: '',          // display form, e.g. '(703) 000-0000'
-  // TODO(owner): public contact email.
-  email: '',
+  // Public address shown on the current murberec.com.
+  email: 'info@murberec.com',
 
   // TODO(owner): social profile URLs (used in the footer and JSON-LD sameAs).
   social: [] as { label: string; href: string }[],
@@ -33,13 +33,13 @@ export const site = {
 
   ticker: ['Develop your people', 'Grow your leaders', 'Embrace change', 'Delight your customers'],
 
-  // From the handoff brief. TODO(owner): confirm each figure before launch.
+  // "Our impact", as on the current murberec.com. (Its fourth item, "record-
+  // breaking in the regulatory landscape", has no figure and is left out.)
   stats: [
-    { value: '1M+', label: 'Learners reached' },
-    { value: '4', label: 'Continents' },
-    { value: '10+', label: 'Years of practice' },
-    { value: '50+', label: 'Enterprise engagements' },
-  ],
+    { value: '1M+', label: 'Learners reached across four continents' },
+    { value: '1st', label: 'Global Gen-AI readiness program for the world’s largest engineering firm', tag: 'Learning design architecture' },
+    { value: '1st', label: 'Scalable global leadership infrastructure for a Big Three major record label group', tag: 'Leadership development, product design' },
+  ] as { value: string; label: string; tag?: string }[],
 
   // As shown on the current murberec.com ("Our team has delivered for").
   // Original logo files from that site, trimmed and resized to 2x display size.
@@ -66,7 +66,7 @@ export const site = {
 
 export const nav = [
   { label: 'Services', href: '/services' },
-  { label: 'Xtudio®', href: '/xtudio' },
+  { label: 'Xtudio™', href: '/xtudio' },
   { label: 'Work', href: '/work' },
   { label: 'About', href: '/about' },
 ];

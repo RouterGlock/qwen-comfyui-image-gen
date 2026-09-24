@@ -14,24 +14,24 @@ Almost everything lives in **`src/data/site.ts`**. Search the repo for
 |---|---|---|---|
 | 1 | **Real street address** (the old site said "Alexandria, **NY**") | `site.ts` → `address` | Shown in footer + Google business data (JSON-LD). Hidden until set. |
 | 2 | **Real phone number** (old one was a fake 555 number) | `site.ts` → `phone` | Becomes a tap-to-call `tel:` link. Hidden until set. |
-| 3 | **Public email** | `site.ts` → `email` | Becomes a `mailto:` link in footer, contact page, privacy page. |
+| 3 | ~~Public email~~ Done: info@murberec.com, from the current site | `site.ts` → `email` | Shown as a `mailto:` link in footer, contact page, privacy page. |
 | 4 | **Where form leads go** | Cloudflare env var `CONTACT_TO` | See README → Deploy. |
-| 5 | **Confirm the stats**: 1M+ learners, 4 continents, 10+ years, 50+ engagements | `site.ts` → `stats` | Shown on Home and About. The vague "record-breaking in the regulatory landscape" stat was removed. |
-| 6 | **Review all copy**. The live site was unreachable during the build, so service, About, FAQ and Xtudio text is a *draft* written from the brief. | `src/data/services.ts`, `src/data/faq.ts`, `src/pages/about.astro`, `src/pages/xtudio.astro` | It should sound like Marc. |
+| 5 | **Confirm the impact stats** (taken from the current site): 1M+ learners across four continents; 1st global Gen-AI readiness program for the world's largest engineering firm; 1st scalable global leadership infrastructure for a Big Three record label group | `site.ts` → `stats` | Shown on Home and About. The incomplete "record-breaking in the regulatory landscape" item was left out. |
+| 6 | **Review the remaining draft copy**. Home, Xtudio, Contact, the service taglines/descriptions/focus areas and the footer now use the current site's own words. Still drafts: each service page's "when teams call us", phase and deliverables sections; the About page (the live `/about-us` currently shows a broken WordPress template); the FAQ | `src/data/services.ts`, `src/pages/about.astro`, `src/data/faq.ts` | It should sound like Marc. |
 | 7 | **Privacy policy** legal review | `src/pages/privacy.astro` | Required because the form collects personal data. |
-| 8 | **Official name**: "Xtudio®" is used everywhere, at `/xtudio` | Global | The brief flagged three spellings. |
+| 8 | ~~Official name~~ Done: "Xtudio™", matching his logo. ® is only for registered trademarks | Global | Switch to ® only if the mark is registered. |
 
 ## Makes it much stronger (can follow launch)
 
 | # | Item | Where |
 |---|---|---|
-| 9 | **Client logos**: the 12 from the current site are in, auto-scrolling on Home. They're cropped from screenshots, so replace them with the original files (same file names, SVG or 2x PNG) for sharper edges | `public/clients/`, list in `site.ts` → `clients` |
+| 9 | ~~Client logos~~ Done: the 12 original logo files from the current site, auto-scrolling on Home | `public/clients/`, `site.ts` → `clients` |
 | 10 | **2–4 case studies**: problem → approach → measurable result | `src/data/work.ts` (commented example inside). Home teaser + `/work/[slug]` pages appear automatically. |
 | 11 | **Testimonials**: quote, name, role, company (with permission) | `site.ts` → `testimonials`. Section appears on Home. |
-| 12 | **Xtudio triptych**: 3 clips rendered; clip 3 being re-rendered (see `xtudio-reel/README.md`). MiniMax H3 licence confirmed by owner | `xtudio-reel/`. The "Content that inspires action" section on the Xtudio page appears once the files exist. |
+| 12 | ~~Xtudio triptych~~ Done: all 3 clips rendered and live on the Xtudio page | `xtudio-reel/`, `public/xtudio/` | |
 | 12b | **Xtudio reel videos** (poster image + video file/URL each) | `reels` array in `src/pages/xtudio.astro`. Replaces the "request the reel" block and the old "01 / FILM" placeholders. |
 | 13 | **Social profile URLs** (LinkedIn etc.) | `site.ts` → `social` |
-| 14 | **Logo files**: MURBEREC® (to replace the text wordmark and generated favicon). Xtudio logo is redrawn; an original vector would be even better | `public/favicon.svg`, `Nav.astro`, `xtudio-reel/xtudio-logo.png` |
+| 14 | **MURBEREC® logo**: Marc wants a new mark (the current rainbow loop reads too much like Meta). Concepts: `brand-logo/` (Qwen-Image). The Xtudio logo is redrawn; an original vector would be even better | `brand-logo/`, `Nav.astro`, `public/favicon.svg` |
 | 15 | **Founder / team** section, if wanted on About | `src/pages/about.astro` |
 
 ## Audit fixes already done

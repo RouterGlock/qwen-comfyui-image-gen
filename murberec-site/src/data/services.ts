@@ -1,6 +1,7 @@
 /**
- * Draft service copy, written from the handoff brief because the live site
- * could not be fetched. TODO(owner): review wording before launch.
+ * Service copy. `summary`, `lede` and `focus` are Marc's own words from the
+ * current murberec.com "Capabilities" section. `signals`, `approach` and
+ * `deliverables` are drafts. TODO(owner): review those before launch.
  */
 
 export interface Service {
@@ -9,8 +10,12 @@ export interface Service {
   /** Page <title>, written around the search term the page targets. */
   seoTitle: string;
   seoDescription: string;
+  /** Tagline, from the live site. */
   summary: string;
+  /** Description, from the live site. */
   lede: string;
+  /** The three focus areas listed on the live site. */
+  focus: string[];
   signals: string[];
   approach: { diagnose: string; design: string; embed: string };
   deliverables: string[];
@@ -23,9 +28,10 @@ export const services: Service[] = [
     seoTitle: 'Neuroscience-Based Leadership Development',
     seoDescription:
       'Custom leadership development programs grounded in neuroscience. MURBEREC® helps leaders build the habits that hold up under pressure, and stays until they stick.',
-    summary: 'Leaders who make better decisions under pressure, and teams that trust them.',
+    summary: 'Leaders people choose to follow.',
     lede:
-      'Most leadership programs are forgotten by the next quarter. We design around how the brain actually builds habits: attention, emotion, repetition and social reinforcement. What your leaders learn shows up in how they lead on a Tuesday afternoon.',
+      'From first-time managers to senior executives, we turn behavioral science into practical habits that build trust, presence, and performance.',
+    focus: ['New managers', 'Executive presence', 'Team trust'],
     signals: [
       'New managers promoted for technical skill, now leading people',
       'A senior team that agrees in the room and drifts apart outside it',
@@ -45,9 +51,10 @@ export const services: Service[] = [
     seoTitle: 'Custom Learning Experience Design',
     seoDescription:
       'Custom learning experience design (LXD) and eLearning built on the science of memory and attention. Programs people finish, remember and use on the job.',
-    summary: 'Learning people finish, remember, and actually use on the job.',
+    summary: 'People who never stop growing.',
     lede:
-      'Completion rates are not learning. We design experiences around how memory works: spaced practice, retrieval, emotion and context. The result is training that changes performance, not just a certificate.',
+      'Bespoke learning journeys built for how the brain pays attention, retains knowledge, and converts insight into action.',
+    focus: ['Onboarding', 'Upskilling', 'Everyday learning'],
     signals: [
       'High completion, low change in performance',
       'A course library nobody browses',
@@ -56,7 +63,7 @@ export const services: Service[] = [
     ],
     approach: {
       diagnose: 'Performance analysis to separate what is a skill gap from what is a system, process or motivation problem.',
-      design: 'Learning experience design across live, digital and blended formats, produced in-house with our content arm, Xtudio®.',
+      design: 'Learning experience design across live, digital and blended formats, produced in-house with our content arm, Xtudio™.',
       embed: 'Spaced reinforcement, on-the-job application and learning analytics tied to business outcomes.',
     },
     deliverables: ['Learning strategy', 'Learning experience design (LXD)', 'Custom eLearning', 'Blended and cohort programs', 'Onboarding journeys', 'Measurement frameworks'],
@@ -67,9 +74,10 @@ export const services: Service[] = [
     seoTitle: 'People-First Change Management Consulting',
     seoDescription:
       'Change management consulting that treats resistance as a signal, not an obstacle. MURBEREC® uses neuroscience to help organizations adopt change and keep it.',
-    summary: 'Change that people adopt, rather than change that happens to them.',
+    summary: 'Change people embrace, not endure.',
     lede:
-      'The brain reads uncertainty as threat. That is why most change efforts stall, and why more communication rarely fixes it. We design change around certainty, autonomy and belonging, so people can move with it instead of against it.',
+      'We reduce uncertainty, create meaning, and build the conditions for new behaviors to take hold across the organization.',
+    focus: ['Adoption', 'Communication', 'Momentum'],
     signals: [
       'A new system or restructure that people are working around',
       'Change fatigue after several initiatives in a row',
@@ -89,9 +97,10 @@ export const services: Service[] = [
     seoTitle: 'Human-Centered Product Design & Delivery',
     seoDescription:
       'Human-centered product design and delivery informed by behavioral science. MURBEREC® designs products and services people understand, adopt and come back to.',
-    summary: 'Products and services designed around how people actually think and decide.',
+    summary: 'Experiences people want to use.',
     lede:
-      'Good products reduce cognitive load. We bring behavioral and cognitive science into discovery, design and delivery, so what you ship is easier to understand, easier to adopt and harder to leave.',
+      'Human-centered products and experiences, simplified around real behavior and delivered with clarity, pace, and purpose.',
+    focus: ['Simplicity', 'On-time delivery', 'Customer experience'],
     signals: [
       'A product that works but that customers find confusing',
       'Internal tools with low adoption',
@@ -114,7 +123,7 @@ export const approach = [
   },
   {
     step: 'Design',
-    body: 'We build a custom solution around how people actually think, learn and change. No templates, no playbooks.',
+    body: 'We use neuroscience as a lens, not a formula, to design experiences that move people from knowing to doing.',
   },
   {
     step: 'Embed',

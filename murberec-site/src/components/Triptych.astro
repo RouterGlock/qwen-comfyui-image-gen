@@ -27,18 +27,18 @@ const pad = String(num).padStart(2, '0');
   <section class="section tri" aria-labelledby="tri-title">
     <div class="wrap tri__grid">
       <div class="tri__copy">
-        <div class="sec-head mono"><p><span class="num">({pad})</span> Xtudio® in motion</p></div>
+        <div class="sec-head mono"><p><span class="num">({pad})</span> Xtudio™ in motion</p></div>
         <h2 id="tri-title" class="h1 reveal">Content that inspires <span class="accent">action.</span></h2>
         <p class="lede muted reveal">Learn. Think. Lead. Three moments, one idea: when content is built around how the brain pays attention, people don’t just watch. They move.</p>
         <a class="btn reveal" href="/contact?topic=xtudio" data-track="cta_click" data-track-where="xtudio-triptych">
-          Make something with Xtudio® <span class="arrow" aria-hidden="true">→</span>
+          Make something with Xtudio™ <span class="arrow" aria-hidden="true">→</span>
         </a>
       </div>
 
-      <div class="tri__stage reveal" role="group" aria-label="Xtudio® showreel: three short clips">
+      <div class="tri__stage reveal" role="group" aria-label="Xtudio™ showreel: three short clips">
         <div class="tri__clips">
           {clips.map((c) => (
-            <video class="tri__clip" poster={`/xtudio/${c.id}.jpg`}
+            <video class="tri__clip" data-poster={`/xtudio/${c.id}.jpg`}
               muted loop playsinline preload="none" width="720" height="1280" aria-label={c.label}>
               {hasWebm(c.id) && <source src={`/xtudio/${c.id}.webm`} type="video/webm" />}
               <source src={`/xtudio/${c.id}.mp4`} type="video/mp4" />
@@ -46,8 +46,8 @@ const pad = String(num).padStart(2, '0');
           ))}
         </div>
         {hasLogo
-          ? <img class="tri__logo" src="/xtudio/xtudio-logo.png" alt="Xtudio™ by Murberec®" width="1226" height="535" />
-          : <p class="tri__logo tri__logo--text" aria-hidden="true">XTUDIO<sup>®</sup></p>}
+          ? <img class="tri__logo" src="/xtudio/xtudio-logo.png" alt="Xtudio™ by Murberec®" width="1226" height="535" loading="lazy" decoding="async" />
+          : <p class="tri__logo tri__logo--text" aria-hidden="true">XTUDIO<sup>™</sup></p>}
         <button class="tri__toggle mono" type="button" aria-pressed="false">Pause</button>
       </div>
     </div>
@@ -106,7 +106,14 @@ const pad = String(num).padStart(2, '0');
       toggle.setAttribute('aria-pressed', String(userPaused));
     };
     toggle.addEventListener('click', () => { userPaused = !userPaused; sync(); });
-    new IntersectionObserver(([e]) => { visible = e.isIntersecting; sync(); }, { threshold: 0.25 }).observe(stage);
+    // Posters and clips wait until the page itself has finished loading, so
+    // they never compete with the text and images above them.
+    const start = () => {
+      videos.forEach((v) => { v.poster = v.dataset.poster!; });
+      new IntersectionObserver(([e]) => { visible = e.isIntersecting; sync(); }, { threshold: 0.25 }).observe(stage);
+    };
     sync();
+    if (document.readyState === 'complete') start();
+    else addEventListener('load', start, { once: true });
   }
 </script>

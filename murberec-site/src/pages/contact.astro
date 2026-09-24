@@ -7,9 +7,9 @@ import { services } from '../data/services';
 const crumbs = [{ name: 'Let’s Converse', path: '/contact' }];
 const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined;
 const audiences = [
-  { value: 'organization', label: 'Organizations', hint: 'Leadership, HR and L&D teams' },
+  { value: 'organization', label: 'Non-tech organizations', hint: 'Leadership, HR and L&D teams' },
   { value: 'tech', label: 'Tech companies', hint: 'Partnerships and product work' },
-  { value: 'student', label: 'Students & interns', hint: 'Internships and early careers' },
+  { value: 'student', label: 'Students / interns', hint: 'Internships and early careers' },
 ];
 ---
 <Base
@@ -19,8 +19,8 @@ const audiences = [
 >
   {turnstileKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
 
-  <PageHero crumbs={crumbs} kicker="Let’s Converse" title="Start with a <span class='accent'>conversation.</span>"
-    lede="Book a free 30-minute discovery call. Tell us a little about what’s going on and we’ll reply within two business days." />
+  <PageHero crumbs={crumbs} kicker="A conversation, not a pitch" title="Let’s <span class='accent'>converse.</span>"
+    lede="Extraordinary organizations don’t happen by chance. They are intentionally designed through exceptional leadership, learning, and organizational performance. Let’s create yours." />
 
   <section class="section">
     <div class="wrap contact">
@@ -41,6 +41,7 @@ const audiences = [
       </aside>
 
       <div class="form-wrap">
+        <h2 class="h3 form__title">Tell us what you’re building</h2>
         <form id="contact-form" class="form" action="/api/contact" method="post" novalidate>
           <fieldset class="aud">
             <legend class="mono muted">I’m reaching out as</legend>
@@ -78,12 +79,12 @@ const audiences = [
             <select id="f-topic" name="topic">
               <option value="">Not sure yet</option>
               {services.map((s) => <option value={s.slug}>{s.title}</option>)}
-              <option value="xtudio">Xtudio® content</option>
+              <option value="xtudio">Xtudio™ content</option>
             </select>
           </div>
 
           <div class="field">
-            <label for="f-msg">What’s going on? <span aria-hidden="true" class="req">*</span></label>
+            <label for="f-msg">What should we know? <span aria-hidden="true" class="req">*</span></label>
             <textarea id="f-msg" name="message" rows="6" required minlength="10" maxlength="5000" aria-describedby="f-msg-hint f-msg-err"></textarea>
             <p class="hint mono muted" id="f-msg-hint">A few sentences is plenty.</p>
             <p class="err" id="f-msg-err" hidden>Please add a short message (at least 10 characters).</p>
@@ -130,6 +131,7 @@ const audiences = [
   .direct a { font-size: var(--step-1); font-weight: 700; text-decoration: none; }
   .direct a:hover { color: var(--cyan-400); }
 
+  .form__title { margin-bottom: var(--space-l); }
   .form { display: grid; gap: var(--space-m); }
   .aud { border: 0; padding: 0; margin: 0 0 var(--space-s); }
   .aud legend { margin-bottom: var(--space-s); }

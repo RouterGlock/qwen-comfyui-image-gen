@@ -61,7 +61,7 @@ const faqSchema = {
       <h2 id="numbers" class="sr-only">By the numbers</h2>
       <dl class="stats">
         {site.stats.map((s) => (
-          <div class="stat reveal"><dt class="mono muted stat__label">{s.label}</dt><dd class="stat__value">{s.value}</dd></div>
+          <div class="stat reveal"><dt class="stat__label">{s.label}</dt><dd class="stat__value">{s.value}</dd>{s.tag && <dd class="stat__tag mono muted">{s.tag}</dd>}</div>
         ))}
       </dl>
     </div>
