@@ -6,9 +6,15 @@ import CtaBand from '../components/CtaBand.astro';
 import { Picture } from 'astro:assets';
 import heroImage from '../assets/hero-human-mind.png';
 import LogoMarquee from '../components/LogoMarquee.astro';
+import Triptych from '../components/Triptych.astro';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { site } from '../data/site';
 import { services, approach } from '../data/services';
 import { caseStudies } from '../data/work';
+
+// The Xtudio clips section shows once xtudio-reel/compose.sh has produced its files.
+const hasTriptych = existsSync(join(process.cwd(), 'public/xtudio/clip-1-learn.mp4'));
 
 // Sections are numbered in render order, so hiding one never leaves a gap.
 let n = 0;
@@ -157,19 +163,25 @@ const next = () => ++n;
     </section>
   )}
 
-  <section class="section xt" aria-labelledby="xtudio-title">
-    <div class="wrap xt__grid">
-      <div>
-        <SectionHead num={next()} label="Content development arm" />
-        <h2 id="xtudio-title" class="display reveal">Xtudio<sup class="accent">™</sup></h2>
+  {hasTriptych ? (
+    <Triptych num={next()} label="Content development arm · Xtudio™"
+      body="eLearning, marketing, and social storytelling, engineered people-first by Murberec®."
+      cta={{ label: 'Step inside Xtudio', href: '/xtudio' }} />
+  ) : (
+    <section class="section xt" aria-labelledby="xtudio-title">
+      <div class="wrap xt__grid">
+        <div>
+          <SectionHead num={next()} label="Content development arm" />
+          <h2 id="xtudio-title" class="display reveal">Xtudio<sup class="accent">™</sup></h2>
+        </div>
+        <div class="xt__body reveal">
+          <p class="h3">Content that inspires <span class="accent">action.</span></p>
+          <p class="lede muted">eLearning, marketing, and social storytelling, engineered people-first by Murberec®.</p>
+          <a class="link-arrow" href="/xtudio">Step inside Xtudio →</a>
+        </div>
       </div>
-      <div class="xt__body reveal">
-        <p class="h3">Content that inspires <span class="accent">action.</span></p>
-        <p class="lede muted">eLearning, marketing, and social storytelling, engineered people-first by Murberec®.</p>
-        <a class="link-arrow" href="/xtudio">Step inside Xtudio →</a>
-      </div>
-    </div>
-  </section>
+    </section>
+  )}
 
   <CtaBand where="home" />
 </Base>

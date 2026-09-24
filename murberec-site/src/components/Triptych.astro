@@ -8,8 +8,19 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-interface Props { num: number }
-const { num } = Astro.props;
+interface Props {
+  num: number;
+  label?: string;
+  body?: string;
+  cta?: { label: string; href: string };
+}
+const {
+  num,
+  label = 'Xtudio™ in motion',
+  body = 'Learn. Think. Lead. Three moments, one idea: when content is built around how the brain pays attention, people don’t just watch. They move.',
+  cta = { label: 'Make something with Xtudio™', href: '/contact?topic=xtudio' },
+} = Astro.props;
+const where = cta.href.startsWith('/xtudio') ? 'home-triptych' : 'xtudio-triptych';
 
 const clips = [
   { id: 'clip-1-learn', label: 'Learn: a learner at the moment an idea clicks' },
@@ -27,11 +38,11 @@ const pad = String(num).padStart(2, '0');
   <section class="section tri" aria-labelledby="tri-title">
     <div class="wrap tri__grid">
       <div class="tri__copy">
-        <div class="sec-head mono"><p><span class="num">({pad})</span> Xtudio™ in motion</p></div>
+        <div class="sec-head mono"><p><span class="num">({pad})</span> {label}</p></div>
         <h2 id="tri-title" class="h1 reveal">Content that inspires <span class="accent">action.</span></h2>
-        <p class="lede muted reveal">Learn. Think. Lead. Three moments, one idea: when content is built around how the brain pays attention, people don’t just watch. They move.</p>
-        <a class="btn reveal" href="/contact?topic=xtudio" data-track="cta_click" data-track-where="xtudio-triptych">
-          Make something with Xtudio™ <span class="arrow" aria-hidden="true">→</span>
+        <p class="lede muted reveal">{body}</p>
+        <a class="btn reveal" href={cta.href} data-track="cta_click" data-track-where={where}>
+          {cta.label} <span class="arrow" aria-hidden="true">→</span>
         </a>
       </div>
 
