@@ -42,8 +42,7 @@ export const site = {
   ],
 
   // As shown on the current murberec.com ("Our team has delivered for").
-  // Logos are cropped from screenshots of that site; swap in the original
-  // files in /public/clients/ (same names) for sharper rendering.
+  // Original logo files from that site, trimmed and resized to 2x display size.
   clients: [
     { name: 'Gap', logo: '/clients/gap.png' },
     { name: 'CommonSpirit Health', logo: '/clients/commonspirit.png' },
