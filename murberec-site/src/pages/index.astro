@@ -6,6 +6,8 @@ import CtaBand from '../components/CtaBand.astro';
 import { Picture } from 'astro:assets';
 import heroImage from '../assets/hero-human-mind.png';
 import LogoMarquee from '../components/LogoMarquee.astro';
+import Rail from '../components/Rail.astro';
+import LightField from '../components/LightField.astro';
 import Triptych from '../components/Triptych.astro';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -19,15 +21,31 @@ const hasTriptych = existsSync(join(process.cwd(), 'public/xtudio/clip-1-learn.m
 // Sections are numbered in render order, so hiding one never leaves a gap.
 let n = 0;
 const next = () => ++n;
+const num = {
+  approach: next(),
+  capabilities: next(),
+  impact: next(),
+  voices: site.testimonials.length ? next() : 0,
+  xtudio: next(),
+  clients: next(),
+  work: caseStudies.length ? next() : 0,
+};
+const year = new Date().getFullYear();
 ---
 <Base
   title="MURBEREC® | Neuroscience-Based Leadership, Learning & Change Consulting"
   description="MURBEREC® is a people-first consulting firm that uses neuroscience to design leadership development, learning experiences and change programs that stick. Book a 30-min discovery call."
 >
-  <section class="hero" aria-labelledby="hero-title">
+  <section class="hero pin-hero dark" data-hero aria-labelledby="hero-title">
     <Picture src={heroImage} alt="" class="hero__bg" formats={['avif', 'webp']} fallbackFormat="jpg" quality={72}
       widths={[640, 960, 1280, 1920, 2560]} sizes="100vw" loading="eager" fetchpriority="high" />
-    <div class="wrap hero__grid">
+    <LightField />
+    <div class="wrap hero__inner">
+      <div class="hero__meta mono">
+        <p><span class="accent">(00)</span> Intro</p>
+        <p class="hero__meta-mid">Leadership · Learning · Change</p>
+        <p class="muted">{year}</p>
+      </div>
       <div class="hero__copy">
         <p class="mono muted hero__kicker">(The human advantage)</p>
         <h1 id="hero-title" class="h1 hero__title">The human mind is the most powerful tool. <span class="accent">Unleashing it is what we do.</span></h1>
@@ -43,80 +61,95 @@ const next = () => ++n;
           <a class="btn btn--ghost" href="#approach">How we work</a>
         </div>
       </div>
+      <div class="hero__foot mono muted">
+        <p>Diagnose → Design → Embed</p>
+        <p class="hero__cue" aria-hidden="true">Scroll ↓</p>
+      </div>
     </div>
   </section>
 
   <Ticker />
 
-  <section id="approach" class="section" aria-labelledby="approach-title">
+  <section id="approach" class="section light" aria-labelledby="approach-title">
     <div class="wrap">
-      <SectionHead num={next()} label="Our approach" aside="Diagnose → Design → Embed" />
-      <div class="approach">
-        <div class="approach__intro">
-          <h2 id="approach-title" class="h1 reveal">No templates.<br /><span class="muted">No playbooks.</span></h2>
+      <SectionHead num={num.approach} label="Our approach" />
+      <div class="ed">
+        <Rail num={num.approach} context="Diagnose → Design → Embed" />
+        <div class="ed__main approach">
+          <h2 id="approach-title" class="h1 reveal" data-bleed>No templates.<br /><span class="muted">No playbooks.</span></h2>
           <div class="reveal">
             <p class="h3">Your people are unlike any other. Your solutions should be the same.</p>
             <p class="muted approach__body">Every organization has its own strategy, culture, and human dynamics. We use neuroscience as a lens, not a formula, to design experiences that move people from knowing to doing.</p>
           </div>
+          <ol class="approach__steps" data-stagger>
+            {approach.map((a, i) => (
+              <li class="reveal">
+                <p class="mono accent">Step 0{i + 1}</p>
+                <h3 class="h3">{a.step}</h3>
+                <p class="muted">{a.body}</p>
+              </li>
+            ))}
+          </ol>
         </div>
-        <ol class="approach__steps">
-          {approach.map((a, i) => (
-            <li class="reveal" style={`transition-delay:${i * 90}ms`}>
-              <p class="mono accent">Step 0{i + 1}</p>
-              <h3 class="h3">{a.step}</h3>
-              <p class="muted">{a.body}</p>
-            </li>
-          ))}
-        </ol>
       </div>
     </div>
   </section>
 
-  <section class="section surface" aria-labelledby="services-title">
+  <section class="section dark" aria-labelledby="services-title">
     <div class="wrap">
-      <SectionHead num={next()} label="Capabilities" aside="4 / systems" />
-      <h2 id="services-title" class="sr-only">Services</h2>
-      <ul class="card-list">
-        {services.map((s, i) => (
-          <li class="reveal">
-            <a class="row-card" href={`/services/${s.slug}`}>
-              <span class="mono muted">0{i + 1}</span>
-              <span>
-                <h3 class="row-card__title">{s.title}</h3>
-                <p class="row-card__tagline">{s.summary}</p>
-                <p class="row-card__body muted">{s.lede}</p>
-                <ul class="row-card__focus mono muted" aria-label="Focus areas">{s.focus.map((f) => <li>/ {f}</li>)}</ul>
-              </span>
-              <span class="row-card__go" aria-hidden="true">→</span>
-            </a>
-          </li>
-        ))}
-      </ul>
+      <SectionHead num={num.capabilities} label="Capabilities" aside={`${services.length} / systems`} />
+      <div class="ed">
+        <Rail num={num.capabilities} context="What we build with you" link={{ label: 'All services', href: '/services' }} />
+        <div class="ed__main">
+          <h2 id="services-title" class="sr-only">Services</h2>
+          <ul class="card-list" data-stagger>
+            {services.map((s, i) => (
+              <li class="reveal">
+                <a class="row-card" href={`/services/${s.slug}`}>
+                  <span class="mono muted">0{i + 1}</span>
+                  <span>
+                    <h3 class="row-card__title">{s.title}</h3>
+                    <p class="row-card__tagline">{s.summary}</p>
+                    <p class="row-card__body muted">{s.lede}</p>
+                    <ul class="row-card__focus mono muted" aria-label="Focus areas">{s.focus.map((f) => <li>/ {f}</li>)}</ul>
+                  </span>
+                  <span class="row-card__go" aria-hidden="true"><span>→</span></span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   </section>
 
   <section class="section light" aria-labelledby="impact-title">
     <div class="wrap">
-      <SectionHead num={next()} label="Our impact" />
-      <h2 id="impact-title" class="h2 impact__title reveal">A decade of changing how people <span class="accent">work.</span></h2>
-      <dl class="stats">
-        {site.stats.map((s) => (
-          <div class="stat reveal">
-            <dt class="stat__label">{s.label}</dt>
-            <dd class="stat__value">{s.value}</dd>
-            {s.tag && <dd class="stat__tag mono muted">{s.tag}</dd>}
-          </div>
-        ))}
-      </dl>
+      <SectionHead num={num.impact} label="Our impact" />
+      <div class="ed">
+        <Rail num={num.impact} context="Measured in people, not pages" />
+        <div class="ed__main">
+          <h2 id="impact-title" class="h2 impact__title reveal" data-bleed>A decade of changing how people <span class="accent">work.</span></h2>
+          <dl class="stats" data-stagger>
+            {site.stats.map((s) => (
+              <div class="stat reveal">
+                <dt class="stat__label">{s.label}</dt>
+                <dd class="stat__value">{s.value}</dd>
+                {s.tag && <dd class="stat__tag mono muted">{s.tag}</dd>}
+              </div>
+            ))}
+          </dl>
+        </div>
+      </div>
     </div>
   </section>
 
   {site.testimonials.length > 0 && (
-    <section class="section" aria-labelledby="voices-title">
+    <section class="section dark" aria-labelledby="voices-title">
       <div class="wrap">
-        <SectionHead num={next()} label="In their words" />
+        <SectionHead num={num.voices} label="In their words" />
         <h2 id="voices-title" class="sr-only">Testimonials</h2>
-        <div class="quotes">
+        <div class="quotes" data-stagger>
           {site.testimonials.map((t) => (
             <figure class="reveal">
               <blockquote class="h3">“{t.quote}”</blockquote>
@@ -129,14 +162,14 @@ const next = () => ++n;
   )}
 
   {hasTriptych ? (
-    <Triptych num={next()} label="Content development arm · Xtudio™"
+    <Triptych num={num.xtudio} label="Content development arm · Xtudio™"
       body="eLearning, marketing, and social storytelling, engineered people-first by Murberec®."
       cta={{ label: 'Step inside Xtudio', href: '/xtudio' }} />
   ) : (
-    <section class="section xt" aria-labelledby="xtudio-title">
+    <section class="section dark xt" aria-labelledby="xtudio-title">
       <div class="wrap xt__grid">
         <div>
-          <SectionHead num={next()} label="Content development arm" />
+          <SectionHead num={num.xtudio} label="Content development arm" />
           <h2 id="xtudio-title" class="display reveal">Xtudio<sup class="accent">™</sup></h2>
         </div>
         <div class="xt__body reveal">
@@ -150,9 +183,8 @@ const next = () => ++n;
 
   <section class="section light clients" aria-labelledby="clients-title">
     <div class="wrap">
-      <SectionHead num={next()} label="Selected experience" />
-      <p class="mono muted">Proof of work</p>
-      <h2 id="clients-title" class="h2 clients__title reveal">Our team has<br />delivered <span class="accent">for.</span></h2>
+      <SectionHead num={num.clients} label="Selected experience" aside="Proof of work" />
+      <h2 id="clients-title" class="h2 clients__title reveal" data-bleed>Our team has<br />delivered <span class="accent">for.</span></h2>
     </div>
     {site.clients.length > 0 && <LogoMarquee />}
     <div class="wrap">
@@ -163,11 +195,11 @@ const next = () => ++n;
   </section>
 
   {caseStudies.length > 0 && (
-    <section class="section surface" aria-labelledby="work-title">
+    <section class="section dark" aria-labelledby="work-title">
       <div class="wrap">
-        <SectionHead num={next()} label="Selected work" />
+        <SectionHead num={num.work} label="Selected work" />
         <h2 id="work-title" class="h2">Proof, not promises.</h2>
-        <ul class="work-teasers">
+        <ul class="work-teasers" data-stagger>
           {caseStudies.slice(0, 3).map((c) => (
             <li class="reveal">
               <a href={`/work/${c.slug}`}>
@@ -185,36 +217,59 @@ const next = () => ++n;
 
 
 
-  <CtaBand where="home" />
+  <CtaBand where="home" tone="dark" />
 </Base>
 
 <style>
-  .hero { position: relative; isolation: isolate; overflow: hidden; padding-block: var(--space-xl); min-height: min(92svh, 60rem); display: grid; align-items: end; }
+  .hero {
+    position: relative; isolation: isolate; overflow: hidden;
+    min-height: calc(100svh - var(--nav-h)); display: grid;
+  }
+  /* Desktop pin. --hero-pin comes from motion.ts; off on mobile and under reduced motion. */
+  @media (min-width: 60rem) and (prefers-reduced-motion: no-preference) {
+    :global(.js) .hero { position: sticky; top: var(--hero-pin, var(--nav-h)); }
+  }
   .hero :global(.hero__bg), .hero :global(.hero__bg img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 72% 30%; z-index: -2; }
+  .hero :global(.hero__bg) { opacity: calc(1 - var(--hp, 0) * 0.5); }
   .hero::after {
     content: ''; position: absolute; inset: 0; z-index: -1;
     background: linear-gradient(to top, var(--ink-950) 8%, rgb(9 9 11 / 0.75) 45%, rgb(9 9 11 / 0.2) 100%);
   }
-  .hero__grid { display: grid; grid-template-columns: minmax(0, 1fr); }
-  .hero__copy { max-width: 46rem; }
+  .hero__inner {
+    display: grid; grid-template-rows: auto 1fr auto; gap: var(--space-l);
+    padding-block: var(--space-m) var(--space-l);
+  }
+  /* Hero exit: --hp (0 to 1) is written by motion.ts from scroll position. */
+  .hero__inner > * {
+    opacity: calc(1 - var(--hp, 0));
+    transform: translate3d(0, calc(var(--hp, 0) * var(--bleed-lift)), 0);
+  }
+  .hero__inner > .hero__foot { opacity: calc(1 - var(--hp, 0) * 3); }
+  .hero__meta, .hero__foot { display: grid; grid-template-columns: 1fr auto; gap: var(--space-s); align-items: baseline; }
+  .hero__meta { padding-top: var(--space-s); border-top: 1px solid var(--ink-700); }
+  .hero__foot { padding-top: var(--space-s); border-top: 1px solid var(--ink-700); }
+  .hero__meta-mid { display: none; }
+  @media (min-width: 48rem) {
+    .hero__meta { grid-template-columns: 1fr auto 1fr; }
+    .hero__meta-mid { display: block; }
+    .hero__meta > :last-child { text-align: right; }
+  }
+  .hero__copy { align-self: center; max-width: 60rem; }
   .hero__kicker { margin-bottom: var(--space-m); }
-  .hero__title { font-size: clamp(2.2rem, min(1.2rem + 3.3vw, 7vh), 4.4rem); }
+  .hero__title { font-size: clamp(2.3rem, min(1rem + 4vw, 7vh), 5.5rem); }
   .hero__sub { margin-top: var(--space-l); color: var(--paper-100); }
   .hero__lede { margin-top: var(--space-m); color: #d4d4d8; }
   .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-s); margin-top: var(--space-l); }
   @media (min-width: 64rem) {
-    .hero { align-items: center; }
     .hero::after { background: linear-gradient(90deg, var(--ink-950) 0%, rgb(9 9 11 / 0.88) 38%, rgb(9 9 11 / 0.25) 70%, rgb(9 9 11 / 0.1) 100%), linear-gradient(to top, var(--ink-950), transparent 30%); }
   }
 
   .approach { display: grid; gap: var(--space-xl); }
-  .approach__intro { display: grid; gap: var(--space-l); align-items: end; }
-  .approach__intro .h3 { max-width: 24ch; }
+  .approach .h3 { max-width: 24ch; }
   .approach__body { margin-top: var(--space-m); max-width: 52ch; }
-  @media (min-width: 60rem) { .approach__intro { grid-template-columns: 1fr 1fr; } }
-  .approach__steps { list-style: none; display: grid; gap: var(--space-l); counter-reset: step; }
-  .approach__steps li { display: grid; gap: var(--space-s); padding-top: var(--space-m); border-top: 1px solid var(--ink-700); }
-  @media (min-width: 56rem) { .approach__steps { grid-template-columns: repeat(3, 1fr); } }
+  .approach__steps { list-style: none; display: grid; gap: var(--space-l); }
+  .approach__steps li { display: grid; gap: var(--space-s); padding-top: var(--space-m); border-top: 1px solid var(--rule); }
+  @media (min-width: 72rem) { .approach__steps { grid-template-columns: repeat(3, 1fr); } }
 
   .row-card__tagline { margin-top: var(--space-s); font-size: var(--step-1); font-weight: 700; letter-spacing: -0.01em; }
   .row-card__focus { list-style: none; display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; margin-top: var(--space-s); }

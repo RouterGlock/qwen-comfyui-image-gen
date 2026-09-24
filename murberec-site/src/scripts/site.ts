@@ -1,10 +1,11 @@
 /**
- * Site-wide behavior: scroll reveals and analytics events.
+ * Site-wide behavior: analytics events, plus the motion system (motion.ts).
  *
  * track() is provider-agnostic: it pushes to window.dataLayer (GTM / GA4)
  * and calls window.plausible or window.zaraz if either is on the page, so
  * the owner can pick an analytics tool without touching markup.
  */
+import './motion';
 
 declare global {
   interface Window {
@@ -31,21 +32,3 @@ document.addEventListener('click', (e) => {
   track(el.dataset.track!, props);
 });
 
-// Reveal on scroll. CSS makes .reveal visible immediately under reduced motion.
-const reveals = document.querySelectorAll('.reveal');
-if ('IntersectionObserver' in window && reveals.length) {
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-in');
-          io.unobserve(entry.target);
-        }
-      }
-    },
-    { rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
-  );
-  reveals.forEach((el) => io.observe(el));
-} else {
-  reveals.forEach((el) => el.classList.add('is-in'));
-}

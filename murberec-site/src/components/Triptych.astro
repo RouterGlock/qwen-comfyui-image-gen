@@ -7,6 +7,7 @@
  */
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import SectionHead from './SectionHead.astro';
 
 interface Props {
   num: number;
@@ -32,14 +33,13 @@ const publicDir = join(process.cwd(), 'public/xtudio/');
 const ready = clips.every((c) => existsSync(`${publicDir}${c.id}.mp4`) && existsSync(`${publicDir}${c.id}.jpg`));
 const hasWebm = (id: string) => existsSync(`${publicDir}${id}.webm`);
 const hasLogo = existsSync(`${publicDir}xtudio-logo.png`);
-const pad = String(num).padStart(2, '0');
 ---
 {ready && (
-  <section class="section tri" aria-labelledby="tri-title">
+  <section class="section dark tri" aria-labelledby="tri-title">
     <div class="wrap tri__grid">
-      <div class="tri__copy">
-        <div class="sec-head mono"><p><span class="num">({pad})</span> {label}</p></div>
-        <h2 id="tri-title" class="h1 reveal">Content that inspires <span class="accent">action.</span></h2>
+      <div class="tri__copy" data-stagger>
+        <SectionHead num={num} label={label} aside="Learn · Think · Lead" />
+        <h2 id="tri-title" class="h1 reveal" data-bleed>Content that inspires <span class="accent">action.</span></h2>
         <p class="lede muted reveal">{body}</p>
         <a class="btn reveal" href={cta.href} data-track="cta_click" data-track-where={where}>
           {cta.label} <span class="arrow" aria-hidden="true">→</span>

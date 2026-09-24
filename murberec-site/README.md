@@ -66,3 +66,21 @@ change-management, product-design-delivery}`, `/xtudio`, `/work`, `/about`,
 
 Until step 3 is done, the form tells visitors it's temporarily unavailable,
 so leads are never silently lost.
+
+## Motion & editorial layout
+
+All tuning lives in two places:
+
+| What | Where |
+|---|---|
+| Reveal distance / duration / stagger, rule draw speed, hover shift, bleed lift, **marquee speed** (`--marquee-duration`, higher = slower) | `src/styles/global.css` → `:root` "Motion" block |
+| Section colours (`--tone-dark-*`, `--tone-light-*`, `--tone-accent-*`) | `src/styles/global.css` → `:root` "Surfaces" block |
+| Sticky offsets (`--nav-h`, `--sticky-top` for the rails) | `src/styles/global.css` → `:root` "Layout offsets" block |
+| Lenis smoothness, hero fade distance, section fade-out window, light-shaft brightness/colours/beams | `src/scripts/motion.config.ts` |
+
+Building blocks: `SectionHead` (number · label · year/status meta row), `Rail`
++ `.ed` / `.ed__main` (sticky rail layout), `LightField` (cyan light shafts),
+`CtaBand tone="dark"`. Add `.reveal` to animate an element in, `data-stagger`
+on a parent to stagger its `.reveal` children, and `data-bleed` to fade a
+header out as it reaches the top. Everything is static and visible under
+`prefers-reduced-motion`.

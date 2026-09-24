@@ -1,16 +1,21 @@
 ---
 import { site } from '../data/site';
-interface Props { heading?: string; body?: string; where: string }
+import LightField from './LightField.astro';
+interface Props { heading?: string; body?: string; where: string; tone?: 'accent' | 'dark' }
 const {
   heading = 'Let’s build what’s next.',
   body = 'Tell us what you’re seeing. In 30 minutes we’ll help you figure out what’s really going on, and whether we’re the right people to help.',
   where,
+  tone = 'accent',
 } = Astro.props;
+const dark = tone === 'dark';
 ---
-<section class="cta-band" aria-labelledby={`cta-${where}`}>
+<section class:list={['cta-band', { 'cta-band--dark': dark }]} aria-labelledby={`cta-${where}`}>
+  {dark && <LightField intensity={0.7} />}
   <div class="wrap cta-band__inner">
-    <h2 id={`cta-${where}`} class="h1">{heading}</h2>
-    <div class="cta-band__side">
+    {dark && <p class="mono muted cta-band__eyebrow reveal">(Next) Let’s converse</p>}
+    <h2 id={`cta-${where}`} class:list={[dark ? 'display' : 'h1', 'reveal']}>{heading}</h2>
+    <div class="cta-band__side reveal">
       <p class="lede">{body}</p>
       <a class="btn" href={site.primaryCta.href} data-track="cta_click" data-track-where={where}>
         {site.primaryCta.label} <span class="arrow" aria-hidden="true">→</span>
@@ -21,5 +26,9 @@ const {
 <style>
   .cta-band__inner { display: grid; gap: var(--space-l); align-items: end; }
   .cta-band__side { display: grid; gap: var(--space-m); justify-items: start; }
-  @media (min-width: 60rem) { .cta-band__inner { grid-template-columns: 1.4fr 1fr; } }
+  @media (min-width: 60rem) { .cta-band:not(.cta-band--dark) .cta-band__inner { grid-template-columns: 1.4fr 1fr; } }
+  .cta-band--dark .display { max-width: 14ch; }
+  .cta-band--dark .cta-band__side { max-width: 40rem; }
+  .cta-band--dark .lede { color: #d4d4d8; }
+  @media (min-width: 60rem) { .cta-band--dark .cta-band__side { margin-left: calc(100% / 12 * 4); } }
 </style>

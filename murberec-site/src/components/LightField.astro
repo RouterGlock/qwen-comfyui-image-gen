@@ -1,0 +1,32 @@
+---
+/**
+ * Ambient cyan light shafts behind a dark section. motion.ts paints the
+ * canvas on capable desktops; phones, low-power devices and no-JS visitors
+ * keep the CSS glow underneath, which is static under reduced motion.
+ * Place inside a positioned, isolated parent.
+ */
+interface Props { intensity?: number }
+const { intensity = 1 } = Astro.props;
+---
+<div class="lightfield" aria-hidden="true" data-lightfield data-intensity={intensity}>
+  <div class="lightfield__glow"></div>
+  <canvas class="lightfield__canvas"></canvas>
+</div>
+
+<style>
+  .lightfield { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  .lightfield__glow {
+    position: absolute; inset: -20%;
+    background:
+      radial-gradient(28% 60% at 70% 30%, rgb(35 210 226 / 0.16), transparent 70%),
+      radial-gradient(22% 50% at 88% 70%, rgb(35 210 226 / 0.10), transparent 70%);
+    animation: lf-drift 22s ease-in-out infinite alternate;
+    transition: opacity 0.8s ease, visibility 0s 0.8s;
+  }
+  .lightfield__canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.2s ease; mix-blend-mode: screen; }
+  .lightfield.is-live .lightfield__canvas { opacity: 1; }
+  /* Once the canvas takes over, hide the fallback and stop its animation. */
+  .lightfield.is-live .lightfield__glow { opacity: 0; visibility: hidden; animation: none; }
+  @keyframes lf-drift { to { transform: translate3d(-4%, 3%, 0); } }
+  @media (prefers-reduced-motion: reduce) { .lightfield__glow { animation: none; } }
+</style>

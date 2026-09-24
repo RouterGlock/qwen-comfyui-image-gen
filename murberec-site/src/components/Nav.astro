@@ -20,7 +20,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
       <span class="nav__toggle-label">Menu</span>
     </button>
 
-    <nav id="nav-menu" class="nav__menu" aria-label="Main">
+    <nav id="nav-menu" class="nav__menu" aria-label="Main" data-lenis-prevent>
       <ul>
         {nav.map((item, i) => (
           <li>
@@ -46,7 +46,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
             backdrop-filter: blur(14px) saturate(1.4);
     border-bottom: 1px solid var(--ink-800);
   }
-  .nav__inner { display: flex; align-items: center; justify-content: space-between; min-height: 4.5rem; gap: var(--space-m); }
+  .nav__inner { display: flex; align-items: center; justify-content: space-between; min-height: var(--nav-h); gap: var(--space-m); }
   .nav__logo { display: inline-flex; align-items: center; gap: 0.55rem; font-weight: 800; font-size: 1.35rem; letter-spacing: -0.04em; text-decoration: none; }
   .nav__mark { display: block; width: 30px; height: 30px; }
   .nav__mark :global(svg) { display: block; width: 100%; height: 100%; }
@@ -69,7 +69,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
       background: none; color: inherit; border: 1px solid var(--ink-700); border-radius: var(--radius); cursor: pointer;
     }
     .nav__menu {
-      display: none; position: absolute; inset: 100% 0 auto 0; height: calc(100dvh - 4.5rem);
+      display: none; position: absolute; inset: 100% 0 auto 0; height: calc(100dvh - var(--nav-h));
       flex-direction: column; align-items: stretch; justify-content: space-between;
       padding: var(--space-l) var(--gutter); background: var(--ink-950); overflow-y: auto;
     }
@@ -89,6 +89,8 @@ const isCurrent = (href: string) => path === href || path.startsWith(href + '/')
     nav.toggleAttribute('data-open', open);
     label.textContent = open ? 'Close' : 'Menu';
     document.body.style.overflow = open ? 'hidden' : '';
+    // Lets motion.ts pause smooth scrolling while the menu covers the page.
+    document.dispatchEvent(new CustomEvent('scroll-lock', { detail: open }));
   };
   toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
   document.addEventListener('keydown', (e) => {

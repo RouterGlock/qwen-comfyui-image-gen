@@ -1,0 +1,11 @@
+---
+/** Narrow sticky context rail for .ed sections (static on mobile). */
+interface Props { num: number; context?: string; link?: { label: string; href: string } }
+const { num, context, link } = Astro.props;
+---
+<div class="ed__rail rail">
+  <p class="rail__index" aria-hidden="true">{String(num).padStart(2, '0')}</p>
+  {context && <p class="mono muted rail__context">{context}</p>}
+  {link && <a class="link-arrow" href={link.href}>{link.label} <span aria-hidden="true">→</span></a>}
+  <slot />
+</div>
