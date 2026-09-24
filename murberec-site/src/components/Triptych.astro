@@ -1,0 +1,112 @@
+---
+/**
+ * "Content That Inspires Action": three portrait loops side by side ( | | | )
+ * with the Xtudio logo floating over them. Files come from
+ * xtudio-reel/compose.sh, which writes them to public/xtudio/. Renders
+ * nothing until they exist, so the page never shows empty frames.
+ */
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
+interface Props { num: number }
+const { num } = Astro.props;
+
+const clips = [
+  { id: 'clip-1-learn', label: 'Learn: a learner at the moment an idea clicks' },
+  { id: 'clip-2-think', label: 'Think: macro shot of an eye reflecting a network of light, like neurons firing' },
+  { id: 'clip-3-lead', label: 'Lead: a team leader speaking with an engaged team' },
+];
+// Astro builds from the project root, so resolve public/ from there.
+const publicDir = join(process.cwd(), 'public/xtudio/');
+const ready = clips.every((c) => existsSync(`${publicDir}${c.id}.mp4`) && existsSync(`${publicDir}${c.id}.jpg`));
+const hasWebm = (id: string) => existsSync(`${publicDir}${id}.webm`);
+const hasLogo = existsSync(`${publicDir}xtudio-logo.png`);
+const pad = String(num).padStart(2, '0');
+---
+{ready && (
+  <section class="section tri" aria-labelledby="tri-title">
+    <div class="wrap tri__grid">
+      <div class="tri__copy">
+        <div class="sec-head mono"><p><span class="num">({pad})</span> Xtudio® in motion</p></div>
+        <h2 id="tri-title" class="h1 reveal">Content that inspires <span class="accent">action.</span></h2>
+        <p class="lede muted reveal">Learn. Think. Lead. Three moments, one idea: when content is built around how the brain pays attention, people don’t just watch. They move.</p>
+        <a class="btn reveal" href="/contact?topic=xtudio" data-track="cta_click" data-track-where="xtudio-triptych">
+          Make something with Xtudio® <span class="arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <div class="tri__stage reveal" role="group" aria-label="Xtudio® showreel: three short clips">
+        <div class="tri__clips">
+          {clips.map((c) => (
+            <video class="tri__clip" poster={`/xtudio/${c.id}.jpg`}
+              muted loop playsinline preload="none" width="720" height="1280" aria-label={c.label}>
+              {hasWebm(c.id) && <source src={`/xtudio/${c.id}.webm`} type="video/webm" />}
+              <source src={`/xtudio/${c.id}.mp4`} type="video/mp4" />
+            </video>
+          ))}
+        </div>
+        {hasLogo
+          ? <img class="tri__logo" src="/xtudio/xtudio-logo.png" alt="Xtudio®" width="1600" height="360" />
+          : <p class="tri__logo tri__logo--text" aria-hidden="true">XTUDIO<sup>®</sup></p>}
+        <button class="tri__toggle mono" type="button" aria-pressed="false">Pause</button>
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .tri { background: radial-gradient(ellipse 50% 70% at 75% 50%, rgb(35 210 226 / 0.1), transparent 70%), var(--ink-950); }
+  .tri__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-xl); align-items: center; }
+  .tri__copy { display: grid; gap: var(--space-m); justify-items: start; }
+  .tri__copy .sec-head { width: 100%; margin-bottom: var(--space-s); }
+  @media (min-width: 64rem) { .tri__grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); } }
+
+  .tri__stage { position: relative; }
+  .tri__clips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(6px, 0.8vw, 12px); }
+  .tri__clip {
+    width: 100%; height: auto; aspect-ratio: 9 / 16; object-fit: cover; background: var(--ink-850);
+    border-radius: var(--radius);
+  }
+  /* Stagger the middle panel for rhythm on wide screens. */
+  @media (min-width: 40rem) { .tri__clip:nth-child(2) { transform: translateY(-6%); } }
+  .tri__stage::after {
+    content: ''; position: absolute; inset: 55% 0 0 0; pointer-events: none;
+    background: linear-gradient(to bottom, transparent, rgb(9 9 11 / 0.55) 55%, transparent);
+  }
+  .tri__logo {
+    position: absolute; left: 50%; top: 74%; transform: translate(-50%, -50%); z-index: 1;
+    width: 62%; height: auto; pointer-events: none; filter: drop-shadow(0 6px 30px rgb(0 0 0 / 0.5));
+  }
+  .tri__logo--text { width: auto; font-size: clamp(2.5rem, 7vw, 6rem); font-weight: 800; letter-spacing: -0.05em; line-height: 1; }
+  .tri__logo--text sup { font-size: 0.3em; color: var(--cyan-400); }
+  .tri__toggle {
+    position: absolute; right: 8px; bottom: 8px; z-index: 2; min-height: 36px; padding: 0 0.8rem;
+    background: rgb(9 9 11 / 0.7); color: var(--paper-50); border: 1px solid var(--ink-700); border-radius: 999px; cursor: pointer;
+  }
+  .tri__toggle:hover { border-color: var(--cyan-400); }
+</style>
+
+<script>
+  // Autoplay only while on screen, never under reduced motion; the button
+  // lets anyone pause (WCAG 2.2.2 for content that moves longer than 5 s).
+  const stage = document.querySelector<HTMLElement>('.tri__stage');
+  if (stage) {
+    const videos = [...stage.querySelectorAll<HTMLVideoElement>('video')];
+    const toggle = stage.querySelector<HTMLButtonElement>('.tri__toggle')!;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    let userPaused = reduce.matches;
+    let visible = false;
+
+    const sync = () => {
+      const play = visible && !userPaused;
+      videos.forEach((v) => {
+        if (play) { v.preload = 'auto'; v.play().catch(() => {}); } else v.pause();
+      });
+      toggle.textContent = userPaused ? 'Play' : 'Pause';
+      toggle.setAttribute('aria-pressed', String(userPaused));
+    };
+    toggle.addEventListener('click', () => { userPaused = !userPaused; sync(); });
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; sync(); }, { threshold: 0.25 }).observe(stage);
+    sync();
+  }
+</script>

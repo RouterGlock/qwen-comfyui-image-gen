@@ -35,6 +35,7 @@ src/styles/global.css   design tokens (colors, type scale, spacing) and shared s
 functions/api/contact.ts   form handler: validation, honeypot, Turnstile, email via Resend
 public/_redirects       301s from the old Framer URLs
 public/_headers         security + caching headers
+xtudio-reel/            render + compose kit for the Xtudio "Content that inspires action" clips
 ```
 
 Pages: `/`, `/services`, `/services/{leadership-development, learning-development,

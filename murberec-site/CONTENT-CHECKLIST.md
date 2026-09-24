@@ -28,9 +28,10 @@ Almost everything lives in **`src/data/site.ts`**. Search the repo for
 | 9 | **Approved client logos** (SVG preferred) + names | `site.ts` → `clients`, files in `public/clients/`. The industry list shows until then. |
 | 10 | **2–4 case studies**: problem → approach → measurable result | `src/data/work.ts` (commented example inside). Home teaser + `/work/[slug]` pages appear automatically. |
 | 11 | **Testimonials**: quote, name, role, company (with permission) | `site.ts` → `testimonials`. Section appears on Home. |
-| 12 | **Xtudio reel videos** (poster image + video file/URL each) | `reels` array in `src/pages/xtudio.astro`. Replaces the "request the reel" block. Replaces the old "01 / FILM" placeholders. |
+| 12 | **Xtudio triptych**: render the 3 clips (see `xtudio-reel/README.md`), and **check the MiniMax H3 licence covers US commercial use first** | `xtudio-reel/`. The "Content that inspires action" section on the Xtudio page appears once the files exist. |
+| 12b | **Xtudio reel videos** (poster image + video file/URL each) | `reels` array in `src/pages/xtudio.astro`. Replaces the "request the reel" block and the old "01 / FILM" placeholders. |
 | 13 | **Social profile URLs** (LinkedIn etc.) | `site.ts` → `social` |
-| 14 | **Logo files** (to replace the text wordmark and generated favicon) | `public/favicon.svg`, `Nav.astro` |
+| 14 | **Logo files**: MURBEREC® and Xtudio® (to replace the text wordmarks and generated favicon) | `public/favicon.svg`, `Nav.astro`, `xtudio-reel/xtudio-logo.png` |
 | 15 | **Founder / team** section, if wanted on About | `src/pages/about.astro` |
 
 ## Audit fixes already done
