@@ -46,7 +46,7 @@ const pad = String(num).padStart(2, '0');
           ))}
         </div>
         {hasLogo
-          ? <img class="tri__logo" src="/xtudio/xtudio-logo.png" alt="Xtudio®" width="1600" height="360" />
+          ? <img class="tri__logo" src="/xtudio/xtudio-logo.png" alt="Xtudio™ by Murberec®" width="1226" height="535" />
           : <p class="tri__logo tri__logo--text" aria-hidden="true">XTUDIO<sup>®</sup></p>}
         <button class="tri__toggle mono" type="button" aria-pressed="false">Pause</button>
       </div>
@@ -74,8 +74,8 @@ const pad = String(num).padStart(2, '0');
     background: linear-gradient(to bottom, transparent, rgb(9 9 11 / 0.55) 55%, transparent);
   }
   .tri__logo {
-    position: absolute; left: 50%; top: 74%; transform: translate(-50%, -50%); z-index: 1;
-    width: 62%; height: auto; pointer-events: none; filter: drop-shadow(0 6px 30px rgb(0 0 0 / 0.5));
+    position: absolute; left: 50%; top: 72%; transform: translate(-50%, -50%); z-index: 1;
+    width: 56%; height: auto; pointer-events: none; filter: drop-shadow(0 6px 30px rgb(0 0 0 / 0.5));
   }
   .tri__logo--text { width: auto; font-size: clamp(2.5rem, 7vw, 6rem); font-weight: 800; letter-spacing: -0.05em; line-height: 1; }
   .tri__logo--text sup { font-size: 0.3em; color: var(--cyan-400); }
