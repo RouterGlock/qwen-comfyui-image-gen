@@ -1,0 +1,212 @@
+---
+import Base from '../layouts/Base.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Ticker from '../components/Ticker.astro';
+import CtaBand from '../components/CtaBand.astro';
+import NeuralField from '../components/NeuralField.astro';
+import { site } from '../data/site';
+import { services, approach } from '../data/services';
+import { caseStudies } from '../data/work';
+
+// Sections are numbered in render order, so hiding one never leaves a gap.
+let n = 0;
+const next = () => ++n;
+---
+<Base
+  title="MURBEREC® | Neuroscience-Based Leadership, Learning & Change Consulting"
+  description="MURBEREC® is a people-first consulting firm that uses neuroscience to design leadership development, learning experiences and change programs that stick. Book a 30-min discovery call."
+>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap hero__grid">
+      <div class="hero__copy">
+        <p class="mono muted hero__kicker">People-first consulting <span class="accent">/</span> grounded in neuroscience</p>
+        <h1 id="hero-title" class="display">Optimal human <span class="accent">performance.</span></h1>
+        <p class="lede hero__lede">
+          We help leadership, HR and L&amp;D teams change how people lead, learn and work.
+          Every program is built from scratch around how the brain actually changes, and we stay until it sticks.
+        </p>
+        <div class="hero__actions">
+          <a class="btn" href={site.primaryCta.href} data-track="cta_click" data-track-where="hero">
+            {site.primaryCta.label} <span class="arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="btn btn--ghost" href="#approach">How we work</a>
+        </div>
+      </div>
+      <div class="hero__art">
+        <NeuralField />
+      </div>
+    </div>
+  </section>
+
+  <Ticker />
+
+  <section id="approach" class="section" aria-labelledby="approach-title">
+    <div class="wrap">
+      <SectionHead num={next()} label="Our approach" aside="Diagnose → Design → Embed" />
+      <div class="approach">
+        <h2 id="approach-title" class="h1 reveal">No templates.<br /><span class="muted">No playbooks.</span></h2>
+        <ol class="approach__steps">
+          {approach.map((a, i) => (
+            <li class="reveal" style={`transition-delay:${i * 90}ms`}>
+              <p class="mono accent">Step 0{i + 1}</p>
+              <h3 class="h3">{a.step}</h3>
+              <p class="muted">{a.body}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface" aria-labelledby="services-title">
+    <div class="wrap">
+      <SectionHead num={next()} label="What we do" aside="4 disciplines" />
+      <h2 id="services-title" class="sr-only">Services</h2>
+      <ul class="card-list">
+        {services.map((s, i) => (
+          <li class="reveal">
+            <a class="row-card" href={`/services/${s.slug}`}>
+              <span class="mono muted">0{i + 1}</span>
+              <span>
+                <h3 class="row-card__title">{s.title}</h3>
+                <p class="row-card__body muted">{s.summary}</p>
+              </span>
+              <span class="row-card__go" aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section light" aria-labelledby="impact-title">
+    <div class="wrap">
+      <SectionHead num={next()} label="Impact" />
+      <h2 id="impact-title" class="h2 impact__title reveal">A decade of changing how people <span class="accent">work.</span></h2>
+      <dl class="stats">
+        {site.stats.map((s) => (
+          <div class="stat reveal">
+            <dt class="mono muted stat__label">{s.label}</dt>
+            <dd class="stat__value">{s.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  {site.testimonials.length > 0 && (
+    <section class="section" aria-labelledby="voices-title">
+      <div class="wrap">
+        <SectionHead num={next()} label="In their words" />
+        <h2 id="voices-title" class="sr-only">Testimonials</h2>
+        <div class="quotes">
+          {site.testimonials.map((t) => (
+            <figure class="reveal">
+              <blockquote class="h3">“{t.quote}”</blockquote>
+              <figcaption class="mono muted">{t.name}, {t.role}, {t.org}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="section" aria-labelledby="clients-title">
+    <div class="wrap">
+      <SectionHead num={next()} label="Who we work with" />
+      <h2 id="clients-title" class="h2 reveal">Enterprise teams across <span class="accent">five sectors.</span></h2>
+      {site.clients.length > 0 ? (
+        <ul class="logos">
+          {site.clients.map((c) => (
+            <li><img src={c.logo} alt={c.name} width="160" height="60" loading="lazy" decoding="async" /></li>
+          ))}
+        </ul>
+      ) : (
+        <ul class="industries mono">
+          {site.industries.map((ind) => <li>{ind}</li>)}
+        </ul>
+      )}
+    </div>
+  </section>
+
+  {caseStudies.length > 0 && (
+    <section class="section surface" aria-labelledby="work-title">
+      <div class="wrap">
+        <SectionHead num={next()} label="Selected work" />
+        <h2 id="work-title" class="h2">Proof, not promises.</h2>
+        <ul class="work-teasers">
+          {caseStudies.slice(0, 3).map((c) => (
+            <li class="reveal">
+              <a href={`/work/${c.slug}`}>
+                <p class="mono muted">{c.industry}</p>
+                <h3 class="h3">{c.title}</h3>
+                {c.results[0] && <p class="work-teasers__stat accent">{c.results[0].value} <span class="muted">{c.results[0].label}</span></p>}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p><a class="link-arrow" href="/work">All case studies →</a></p>
+      </div>
+    </section>
+  )}
+
+  <section class="section xt" aria-labelledby="xtudio-title">
+    <div class="wrap xt__grid">
+      <div>
+        <SectionHead num={next()} label="Our content arm" />
+        <h2 id="xtudio-title" class="display reveal">Xtudio<sup class="accent">®</sup></h2>
+      </div>
+      <div class="xt__body reveal">
+        <p class="lede">Where the science becomes something people want to watch, click and share. eLearning, brand storytelling and digital content, made in-house.</p>
+        <a class="link-arrow" href="/xtudio">Step inside Xtudio® →</a>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand where="home" />
+</Base>
+
+<style>
+  .hero { padding-block: var(--space-xl) var(--space-2xl); position: relative; }
+  .hero__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-l); align-items: center; }
+  .hero__copy { position: relative; z-index: 1; }
+  .hero__kicker { margin-bottom: var(--space-m); }
+  .hero__lede { margin-top: var(--space-l); color: #d4d4d8; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-s); margin-top: var(--space-l); }
+  .hero__art { max-width: 34rem; margin-inline: auto; width: 100%; }
+  @media (min-width: 64rem) {
+    .hero { min-height: calc(100svh - 4.5rem - 4.6rem); display: grid; align-items: center; }
+    .hero__grid { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
+    .hero__art { margin-left: -12%; width: 112%; max-width: none; }
+  }
+  @media (max-width: 63.99rem) { .hero__art { order: -1; max-width: 22rem; margin-block: -1rem -2rem; opacity: 0.9; } }
+
+  .approach { display: grid; gap: var(--space-xl); }
+  .approach__steps { list-style: none; display: grid; gap: var(--space-l); counter-reset: step; }
+  .approach__steps li { display: grid; gap: var(--space-s); padding-top: var(--space-m); border-top: 1px solid var(--ink-700); }
+  @media (min-width: 56rem) { .approach__steps { grid-template-columns: repeat(3, 1fr); } }
+
+  .impact__title { max-width: 18ch; margin-bottom: var(--space-xl); }
+
+  .industries { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-s); margin-top: var(--space-l); }
+  .industries li { border: 1px solid var(--ink-700); padding: 0.7rem 1.1rem; border-radius: 999px; }
+  .logos { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--space-l); align-items: center; margin-top: var(--space-l); }
+  .logos img { filter: grayscale(1) brightness(1.6); opacity: 0.8; transition: all 0.3s; }
+  .logos img:hover { filter: none; opacity: 1; }
+
+  .quotes { display: grid; gap: var(--space-xl); }
+  .quotes figure { margin: 0; display: grid; gap: var(--space-m); }
+  .quotes blockquote { margin: 0; }
+
+  .work-teasers { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: var(--space-m); margin-block: var(--space-l); }
+  .work-teasers a { display: grid; gap: var(--space-s); padding: var(--space-m); border: 1px solid var(--ink-700); text-decoration: none; height: 100%; }
+  .work-teasers a:hover { border-color: var(--cyan-400); }
+  .work-teasers__stat { font-size: var(--step-2); font-weight: 800; }
+  .work-teasers__stat span { font-size: var(--step--1); font-weight: 400; }
+
+  .xt { background: radial-gradient(ellipse 60% 80% at 85% 50%, rgb(35 210 226 / 0.12), transparent 70%), var(--ink-950); }
+  .xt__grid { display: grid; gap: var(--space-l); align-items: end; }
+  .xt__grid sup { font-size: 0.3em; vertical-align: top; }
+  .xt__body { display: grid; gap: var(--space-m); justify-items: start; }
+  @media (min-width: 60rem) { .xt__grid { grid-template-columns: 1.3fr 1fr; } }
+</style>

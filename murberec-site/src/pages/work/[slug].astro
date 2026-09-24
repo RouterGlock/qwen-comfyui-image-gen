@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import { caseStudies, type CaseStudy } from '../../data/work';
+
+export function getStaticPaths() {
+  return caseStudies.map((cs) => ({ params: { slug: cs.slug }, props: { cs } }));
+}
+const { cs } = Astro.props as { cs: CaseStudy };
+const crumbs = [{ name: 'Work', path: '/work' }, { name: cs.title, path: `/work/${cs.slug}` }];
+---
+<Base title={`${cs.title} | Case Study`} description={cs.summary} crumbs={crumbs}>
+  <PageHero crumbs={crumbs} kicker={`${cs.client} / ${cs.industry}`} title={cs.title} lede={cs.summary} />
+  <section class="section light">
+    <div class="wrap">
+      <SectionHead num={1} label="Results" />
+      <h2 class="sr-only">Results</h2>
+      <dl class="stats">
+        {cs.results.map((r) => <div class="stat"><dt class="mono muted stat__label">{r.label}</dt><dd class="stat__value">{r.value}</dd></div>)}
+      </dl>
+    </div>
+  </section>
+  <section class="section">
+    <div class="wrap prose">
+      <h2>The problem</h2><p>{cs.problem}</p>
+      <h2>Our approach</h2><p>{cs.approach}</p>
+      {cs.quote && (
+        <figure><blockquote class="h3">“{cs.quote.text}”</blockquote><figcaption class="mono muted">{cs.quote.name}, {cs.quote.role}</figcaption></figure>
+      )}
+    </div>
+  </section>
+  <CtaBand where={`case-${cs.slug}`} />
+</Base>

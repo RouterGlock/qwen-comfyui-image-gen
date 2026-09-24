@@ -1,0 +1,8 @@
+---
+interface Props { num: number; label: string; aside?: string }
+const { num, label, aside } = Astro.props;
+---
+<div class="sec-head mono">
+  <p><span class="num">({String(num).padStart(2, '0')})</span> {label}</p>
+  {aside && <p class="muted">{aside}</p>}
+</div>

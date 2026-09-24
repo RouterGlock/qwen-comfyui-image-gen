@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import { nav } from '../data/site';
+---
+<Base title="Page Not Found | MURBEREC®" description="The page you’re looking for doesn’t exist." noindex>
+  <section class="section nf">
+    <div class="wrap">
+      <p class="mono accent">(404)</p>
+      <h1 class="display">Lost the <span class="accent">thread.</span></h1>
+      <p class="lede muted">That page doesn’t exist, or it moved when we rebuilt the site. Try one of these:</p>
+      <ul class="nf__links">
+        <li><a class="link-arrow" href="/">Home →</a></li>
+        {nav.map((n) => <li><a class="link-arrow" href={n.href}>{n.label} →</a></li>)}
+        <li><a class="link-arrow" href="/contact">Let’s Converse →</a></li>
+      </ul>
+    </div>
+  </section>
+</Base>
+<style>
+  .nf .wrap { display: grid; gap: var(--space-l); }
+  .nf__links { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-m); }
+</style>

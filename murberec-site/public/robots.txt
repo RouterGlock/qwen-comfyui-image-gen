@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /thanks
+
+Sitemap: https://murberec.com/sitemap-index.xml

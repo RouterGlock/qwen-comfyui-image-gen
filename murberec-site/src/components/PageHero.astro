@@ -1,0 +1,32 @@
+---
+interface Props { kicker: string; title: string; lede?: string; crumbs?: { name: string; path: string }[] }
+const { kicker, title, lede, crumbs = [] } = Astro.props;
+---
+<section class="page-hero" aria-labelledby="page-title">
+  <div class="wrap">
+    {crumbs.length > 0 && (
+      <nav class="crumbs mono" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+          {crumbs.map((c, i) => (
+            <li>{i === crumbs.length - 1 ? <span aria-current="page">{c.name}</span> : <a href={c.path}>{c.name}</a>}</li>
+          ))}
+        </ol>
+      </nav>
+    )}
+    <p class="mono accent page-hero__kicker">{kicker}</p>
+    <h1 id="page-title" class="h1"><Fragment set:html={title} /></h1>
+    {lede && <p class="lede muted page-hero__lede">{lede}</p>}
+    <slot />
+  </div>
+</section>
+<style>
+  .page-hero { padding-block: var(--space-xl) var(--space-2xl); border-bottom: 1px solid var(--ink-800); }
+  .crumbs ol { list-style: none; display: flex; flex-wrap: wrap; gap: 0.5em; margin-bottom: var(--space-l); color: var(--gray-400); }
+  .crumbs li + li::before { content: '/'; margin-right: 0.5em; color: var(--ink-700); }
+  .crumbs a { text-decoration: none; }
+  .crumbs a:hover { color: var(--cyan-400); }
+  .crumbs [aria-current] { color: var(--paper-50); }
+  .page-hero__kicker { margin-bottom: var(--space-m); }
+  .page-hero__lede { margin-top: var(--space-l); max-width: 52ch; }
+</style>

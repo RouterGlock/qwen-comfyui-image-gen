@@ -1,0 +1,10 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+---
+<Base title="Thank You" description="Your message has been received." crumbs={[{ name: 'Thank you', path: '/thanks' }]} noindex>
+  <PageHero kicker="Message received" title="Thank you. <span class='muted'>We’ll be in touch.</span>"
+    lede="We reply to every message within two business days. Keep an eye on your inbox, including spam, for a note from us.">
+    <p style="margin-top: var(--space-l)"><a class="link-arrow" href="/">Back to home →</a></p>
+  </PageHero>
+</Base>

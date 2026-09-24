@@ -1,0 +1,25 @@
+---
+import { site } from '../data/site';
+interface Props { heading?: string; body?: string; where: string }
+const {
+  heading = 'Let’s build what’s next.',
+  body = 'Tell us what you’re seeing. In 30 minutes we’ll help you figure out what’s really going on, and whether we’re the right people to help.',
+  where,
+} = Astro.props;
+---
+<section class="cta-band" aria-labelledby={`cta-${where}`}>
+  <div class="wrap cta-band__inner">
+    <h2 id={`cta-${where}`} class="h1">{heading}</h2>
+    <div class="cta-band__side">
+      <p class="lede">{body}</p>
+      <a class="btn" href={site.primaryCta.href} data-track="cta_click" data-track-where={where}>
+        {site.primaryCta.label} <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+<style>
+  .cta-band__inner { display: grid; gap: var(--space-l); align-items: end; }
+  .cta-band__side { display: grid; gap: var(--space-m); justify-items: start; }
+  @media (min-width: 60rem) { .cta-band__inner { grid-template-columns: 1.4fr 1fr; } }
+</style>

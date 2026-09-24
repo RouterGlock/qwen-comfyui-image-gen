@@ -1,0 +1,116 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import { services, type Service } from '../../data/services';
+import { caseStudies } from '../../data/work';
+import { site } from '../../data/site';
+
+export function getStaticPaths() {
+  return services.map((service) => ({ params: { slug: service.slug }, props: { service } }));
+}
+
+const { service } = Astro.props as { service: Service };
+const idx = services.indexOf(service);
+const nextService = services[(idx + 1) % services.length];
+const related = caseStudies.filter((c) => c.services.includes(service.slug));
+const crumbs = [{ name: 'Services', path: '/services' }, { name: service.title, path: `/services/${service.slug}` }];
+const phases = [
+  ['Diagnose', service.approach.diagnose],
+  ['Design', service.approach.design],
+  ['Embed', service.approach.embed],
+] as const;
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: service.title,
+  serviceType: service.seoTitle,
+  description: service.seoDescription,
+  provider: { '@id': `${site.url}/#org` },
+  url: `${site.url}/services/${service.slug}`,
+};
+let n = 0;
+const next = () => ++n;
+---
+<Base title={service.seoTitle} description={service.seoDescription} crumbs={crumbs} schema={[serviceSchema]}>
+  <PageHero crumbs={crumbs} kicker={`Service 0${idx + 1} / 04`} title={service.title} lede={service.lede}>
+    <a class="btn svc-cta" href={site.primaryCta.href} data-track="cta_click" data-track-where={`service-${service.slug}`}>
+      {site.primaryCta.label} <span class="arrow" aria-hidden="true">→</span>
+    </a>
+  </PageHero>
+
+  <section class="section" aria-labelledby="signals">
+    <div class="wrap split">
+      <div>
+        <SectionHead num={next()} label="Sound familiar?" />
+        <h2 id="signals" class="h2">When teams <span class="accent">call us.</span></h2>
+      </div>
+      <ul class="signals">
+        {service.signals.map((s) => <li class="reveal">{s}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section light" aria-labelledby="how">
+    <div class="wrap">
+      <SectionHead num={next()} label="How we work" />
+      <h2 id="how" class="h2">From insight to <span class="accent">habit.</span></h2>
+      <ol class="phases">
+        {phases.map(([name, body], i) => (
+          <li class="reveal"><p class="mono accent">0{i + 1}</p><h3 class="h3">{name}</h3><p class="muted">{body}</p></li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="deliverables">
+    <div class="wrap split">
+      <div>
+        <SectionHead num={next()} label="What you get" />
+        <h2 id="deliverables" class="h2">Typical <span class="accent">deliverables.</span></h2>
+      </div>
+      <ul class="deliv mono">
+        {service.deliverables.map((d) => <li>{d}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  {related.length > 0 && (
+    <section class="section surface" aria-labelledby="proof">
+      <div class="wrap">
+        <SectionHead num={next()} label="Proof" />
+        <h2 id="proof" class="h2">Related work</h2>
+        <ul class="related">
+          {related.map((c) => <li><a class="link-arrow" href={`/work/${c.slug}`}>{c.title} →</a></li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <nav class="next-svc" aria-label="Next service">
+    <a class="wrap" href={`/services/${nextService.slug}`}>
+      <span class="mono muted">Next discipline</span>
+      <span class="h2">{nextService.title} <span aria-hidden="true" class="accent">→</span></span>
+    </a>
+  </nav>
+
+  <CtaBand where={`service-${service.slug}`} heading={`Let’s talk about ${service.title.toLowerCase()}.`} />
+</Base>
+<style>
+  .svc-cta { margin-top: var(--space-l); }
+  .split { display: grid; gap: var(--space-l); }
+  @media (min-width: 60rem) { .split { grid-template-columns: 1fr 1fr; align-items: start; } }
+  .signals { list-style: none; display: grid; }
+  .signals li { font-size: var(--step-1); padding-block: var(--space-m); border-bottom: 1px solid var(--ink-700); padding-left: 2rem; position: relative; }
+  .signals li::before { content: '→'; position: absolute; left: 0; color: var(--cyan-400); font-family: var(--font-mono); }
+  .phases { list-style: none; display: grid; gap: var(--space-l); margin-top: var(--space-xl); }
+  .phases li { display: grid; gap: var(--space-s); border-top: 1px solid currentColor; padding-top: var(--space-m); }
+  @media (min-width: 56rem) { .phases { grid-template-columns: repeat(3, 1fr); } }
+  .deliv { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-s); align-content: start; }
+  .deliv li { border: 1px solid var(--ink-700); padding: 0.7rem 1.1rem; border-radius: 999px; }
+  .related { list-style: none; display: grid; gap: var(--space-s); margin-top: var(--space-l); }
+  .next-svc a { display: grid; gap: var(--space-s); padding-block: var(--space-xl); text-decoration: none; border-top: 1px solid var(--ink-800); }
+  .next-svc a:hover .h2 { color: var(--cyan-400); }
+</style>

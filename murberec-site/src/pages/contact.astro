@@ -1,0 +1,265 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { site, telHref } from '../data/site';
+import { services } from '../data/services';
+
+const crumbs = [{ name: 'Let’s Converse', path: '/contact' }];
+const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined;
+const audiences = [
+  { value: 'organization', label: 'Organizations', hint: 'Leadership, HR and L&D teams' },
+  { value: 'tech', label: 'Tech companies', hint: 'Partnerships and product work' },
+  { value: 'student', label: 'Students & interns', hint: 'Internships and early careers' },
+];
+---
+<Base
+  title="Let’s Converse | Book a Discovery Call"
+  description="Book a free 30-minute discovery call with MURBEREC®. Tell us what you’re seeing in your leadership, learning or change work and we’ll help you find what’s really going on."
+  crumbs={crumbs}
+>
+  {turnstileKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
+
+  <PageHero crumbs={crumbs} kicker="Let’s Converse" title="Start with a <span class='accent'>conversation.</span>"
+    lede="Book a free 30-minute discovery call. Tell us a little about what’s going on and we’ll reply within two business days." />
+
+  <section class="section">
+    <div class="wrap contact">
+      <aside class="contact__side">
+        <h2 class="mono muted">What happens next</h2>
+        <ol class="steps">
+          <li><span class="mono accent">01</span> We read every message ourselves, no bots.</li>
+          <li><span class="mono accent">02</span> We reply within two business days to set up a time.</li>
+          <li><span class="mono accent">03</span> In 30 minutes, we explore what you’re seeing and whether we’re the right fit. No pitch deck.</li>
+        </ol>
+        {(site.email || site.phone) && (
+          <div class="direct">
+            <h2 class="mono muted">Prefer to reach out directly?</h2>
+            {site.email && <p><a href={`mailto:${site.email}`}>{site.email}</a></p>}
+            {site.phone && <p><a href={telHref(site.phone)}>{site.phone}</a></p>}
+          </div>
+        )}
+      </aside>
+
+      <div class="form-wrap">
+        <form id="contact-form" class="form" action="/api/contact" method="post" novalidate>
+          <fieldset class="aud">
+            <legend class="mono muted">I’m reaching out as</legend>
+            <div class="aud__opts">
+              {audiences.map((a, i) => (
+                <label class="aud__opt">
+                  <input type="radio" name="audience" value={a.value} checked={i === 0} />
+                  <span class="aud__label">{a.label}</span>
+                  <span class="aud__hint mono">{a.hint}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="f-name">Full name <span aria-hidden="true" class="req">*</span></label>
+            <input id="f-name" name="name" type="text" autocomplete="name" required maxlength="120" aria-describedby="f-name-err" />
+            <p class="err" id="f-name-err" hidden>Please tell us your name.</p>
+          </div>
+
+          <div class="field">
+            <label for="f-org"><span data-org-label>Organization</span> <span aria-hidden="true" class="req">*</span></label>
+            <input id="f-org" name="organization" type="text" autocomplete="organization" required maxlength="160" aria-describedby="f-org-err" />
+            <p class="err" id="f-org-err" hidden>Please tell us where you work or study.</p>
+          </div>
+
+          <div class="field">
+            <label for="f-email"><span data-email-label>Work email</span> <span aria-hidden="true" class="req">*</span></label>
+            <input id="f-email" name="email" type="email" autocomplete="email" required maxlength="200" aria-describedby="f-email-err" />
+            <p class="err" id="f-email-err" hidden>Please enter a valid email address.</p>
+          </div>
+
+          <div class="field" data-topic-field>
+            <label for="f-topic">What can we help with? <span class="muted opt">(optional)</span></label>
+            <select id="f-topic" name="topic">
+              <option value="">Not sure yet</option>
+              {services.map((s) => <option value={s.slug}>{s.title}</option>)}
+              <option value="xtudio">Xtudio® content</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="f-msg">What’s going on? <span aria-hidden="true" class="req">*</span></label>
+            <textarea id="f-msg" name="message" rows="6" required minlength="10" maxlength="5000" aria-describedby="f-msg-hint f-msg-err"></textarea>
+            <p class="hint mono muted" id="f-msg-hint">A few sentences is plenty.</p>
+            <p class="err" id="f-msg-err" hidden>Please add a short message (at least 10 characters).</p>
+          </div>
+
+          <!-- Honeypot: hidden from people and screen readers; bots fill it in. -->
+          <div class="hp" aria-hidden="true">
+            <label for="f-website">Website</label>
+            <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+
+          {turnstileKey && <div class="cf-turnstile" data-sitekey={turnstileKey} data-theme="dark"></div>}
+
+          <p class="consent muted">
+            By sending this form you agree that we can use your details to reply to you, as described in our <a href="/privacy">privacy policy</a>.
+          </p>
+
+          <div class="form__foot">
+            <button class="btn" type="submit">
+              <span data-submit-label>Send message</span> <span class="arrow" aria-hidden="true">→</span>
+            </button>
+            <p class="form__status" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+
+        <div class="thanks" id="thanks" tabindex="-1" hidden>
+          <p class="mono accent">Message received</p>
+          <h2 class="h2">Thank you. <span class="muted">We’ll be in touch.</span></h2>
+          <p class="lede muted">We reply to every message within two business days. Keep an eye on your inbox, including spam, for a note from us.</p>
+          <a class="link-arrow" href="/">Back to home →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .contact { display: grid; gap: var(--space-xl); }
+  @media (min-width: 60rem) { .contact { grid-template-columns: 1fr 1.6fr; } }
+  .contact__side { display: grid; gap: var(--space-l); align-content: start; }
+  .contact__side h2 { font-weight: 400; font-size: var(--step--1); letter-spacing: 0.04em; line-height: 1.4; margin-bottom: var(--space-s); }
+  .steps { list-style: none; display: grid; gap: var(--space-m); }
+  .steps li { display: grid; grid-template-columns: 2.5rem 1fr; }
+  .direct a { font-size: var(--step-1); font-weight: 700; text-decoration: none; }
+  .direct a:hover { color: var(--cyan-400); }
+
+  .form { display: grid; gap: var(--space-m); }
+  .aud { border: 0; padding: 0; margin: 0 0 var(--space-s); }
+  .aud legend { margin-bottom: var(--space-s); }
+  .aud__opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: var(--space-xs); }
+  .aud__opt {
+    position: relative; display: grid; gap: 0.2rem; padding: var(--space-s) var(--space-m);
+    border: 1px solid var(--ink-700); border-radius: var(--radius); cursor: pointer; transition: border-color 0.2s, background-color 0.2s;
+  }
+  .aud__opt input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .aud__label { font-weight: 700; }
+  .aud__hint { font-size: 0.72rem; color: var(--gray-400); text-transform: none; letter-spacing: 0; }
+  .aud__opt:hover { border-color: var(--gray-400); }
+  .aud__opt:has(input:checked) { border-color: var(--cyan-400); background: rgb(35 210 226 / 0.08); }
+  .aud__opt:has(input:checked) .aud__label { color: var(--cyan-400); }
+  .aud__opt:has(input:focus-visible) { outline: 2px solid var(--cyan-400); outline-offset: 3px; }
+
+  .field { display: grid; gap: 0.4rem; }
+  .field label { font-weight: 600; }
+  .req { color: var(--cyan-400); }
+  .opt { font-weight: 400; }
+  input[type='text'], input[type='email'], select, textarea {
+    width: 100%; font: inherit; color: var(--paper-50); background: var(--ink-900);
+    border: 1px solid var(--ink-700); border-radius: var(--radius); padding: 0.85rem 1rem; min-height: 48px;
+    transition: border-color 0.2s;
+  }
+  select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--gray-400) 50%), linear-gradient(135deg, var(--gray-400) 50%, transparent 50%);
+    background-position: calc(100% - 20px) 55%, calc(100% - 15px) 55%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 2.5rem; }
+  textarea { resize: vertical; min-height: 9rem; }
+  input:hover, select:hover, textarea:hover { border-color: var(--gray-400); }
+  input:focus-visible, select:focus-visible, textarea:focus-visible { border-color: var(--cyan-400); outline: 1px solid var(--cyan-400); outline-offset: 0; }
+  [aria-invalid='true'] { border-color: #ff7b7b !important; }
+  .err { color: #ff9b9b; font-size: var(--step--1); }
+  .err::before { content: '⚠ '; }
+  .hint { font-size: 0.75rem; text-transform: none; letter-spacing: 0; }
+  .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .consent { font-size: var(--step--1); }
+  .form__foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-m); }
+  .form__status { font-size: var(--step--1); }
+  .form__status.is-error { color: #ff9b9b; }
+  .form[aria-busy='true'] .btn { opacity: 0.6; pointer-events: none; }
+
+  .thanks { display: grid; gap: var(--space-m); justify-items: start; padding: var(--space-l); border: 1px solid var(--cyan-400); }
+  .thanks:focus { outline: none; }
+</style>
+
+<script>
+  import { track } from '../scripts/site';
+
+  const form = document.querySelector<HTMLFormElement>('#contact-form')!;
+  const thanks = document.querySelector<HTMLElement>('#thanks')!;
+  const status = form.querySelector<HTMLElement>('.form__status')!;
+  const orgLabel = form.querySelector('[data-org-label]')!;
+  const emailLabel = form.querySelector('[data-email-label]')!;
+  const orgInput = form.querySelector<HTMLInputElement>('#f-org')!;
+  const topic = form.querySelector<HTMLSelectElement>('#f-topic')!;
+
+  // Adapt labels to the audience so students aren't asked for a "work email".
+  const syncAudience = () => {
+    const aud = (form.elements.namedItem('audience') as RadioNodeList).value;
+    const student = aud === 'student';
+    orgLabel.textContent = student ? 'School or university' : aud === 'tech' ? 'Company' : 'Organization';
+    emailLabel.textContent = student ? 'Email' : 'Work email';
+    orgInput.autocomplete = student ? 'off' : 'organization';
+  };
+  form.addEventListener('change', (e) => {
+    if ((e.target as HTMLInputElement).name === 'audience') syncAudience();
+  });
+
+  // Deep links like /contact?topic=xtudio or ?audience=student preselect options.
+  const params = new URLSearchParams(location.search);
+  const t = params.get('topic');
+  if (t && [...topic.options].some((o) => o.value === t)) topic.value = t;
+  const a = params.get('audience');
+  const radio = a && form.querySelector<HTMLInputElement>(`input[name="audience"][value="${CSS.escape(a)}"]`);
+  if (radio) radio.checked = true;
+  syncAudience();
+
+  const fields = ['name', 'organization', 'email', 'message']
+    .map((n) => form.elements.namedItem(n) as HTMLInputElement | HTMLTextAreaElement);
+
+  const validate = (el: HTMLInputElement | HTMLTextAreaElement) => {
+    el.value = el.value.trimStart();
+    const ok = el.checkValidity() && el.value.trim().length > 0;
+    el.setAttribute('aria-invalid', String(!ok));
+    const err = document.getElementById(`${el.id}-err`);
+    if (err) err.hidden = ok;
+    return ok;
+  };
+  fields.forEach((el) => {
+    el.addEventListener('blur', () => el.value && validate(el));
+    el.addEventListener('input', () => el.getAttribute('aria-invalid') === 'true' && validate(el));
+  });
+
+  let started = false;
+  form.addEventListener('focusin', () => {
+    if (!started) { started = true; track('form_start', { form: 'contact' }); }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    status.textContent = '';
+    status.classList.remove('is-error');
+    const invalid = fields.filter((el) => !validate(el));
+    if (invalid.length) {
+      invalid[0].focus();
+      status.textContent = `Please fix ${invalid.length} field${invalid.length > 1 ? 's' : ''} above.`;
+      status.classList.add('is-error');
+      track('form_error', { form: 'contact', reason: 'validation' });
+      return;
+    }
+
+    form.setAttribute('aria-busy', 'true');
+    status.textContent = 'Sending…';
+    const data = new FormData(form);
+    try {
+      const res = await fetch(form.action, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok || !body.ok) throw new Error(body.error || 'Something went wrong.');
+      track('form_submit', { form: 'contact', audience: String(data.get('audience')), topic: String(data.get('topic') || 'none') });
+      form.hidden = true;
+      thanks.hidden = false;
+      thanks.focus();
+      thanks.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    } catch (err) {
+      status.textContent = `${(err as Error).message} Please try again.`;
+      status.classList.add('is-error');
+      track('form_error', { form: 'contact', reason: 'server' });
+      (window as any).turnstile?.reset();
+    } finally {
+      form.removeAttribute('aria-busy');
+    }
+  });
+</script>

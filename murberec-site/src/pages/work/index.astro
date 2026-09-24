@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { caseStudies } from '../../data/work';
+import { services } from '../../data/services';
+const crumbs = [{ name: 'Work', path: '/work' }];
+const svcName = (slug: string) => services.find((s) => s.slug === slug)?.title ?? slug;
+---
+<Base
+  title="Our Work | Case Studies"
+  description="Case studies from MURBEREC®: how neuroscience-informed leadership, learning and change programs delivered measurable results for enterprise teams."
+  crumbs={crumbs}
+>
+  <PageHero crumbs={crumbs} kicker="Case studies" title="Proof, <span class='accent'>not promises.</span>"
+    lede="Problem, approach, measurable result. Here’s what changed for the people and organizations we’ve worked with." />
+
+  <section class="section">
+    <div class="wrap">
+      {caseStudies.length > 0 ? (
+        <ul class="cases">
+          {caseStudies.map((c) => (
+            <li class="reveal">
+              <a href={`/work/${c.slug}`}>
+                <p class="mono muted">{c.industry} / {c.services.map(svcName).join(', ')}</p>
+                <h2 class="h3">{c.title}</h2>
+                <p class="muted">{c.summary}</p>
+                {c.results[0] && <p class="cases__stat"><span class="accent">{c.results[0].value}</span> {c.results[0].label}</p>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div class="empty">
+          <h2 class="h3">Case studies are on their way.</h2>
+          <p class="muted">Most of our work is under NDA, so we’re writing these up with our clients’ permission. In the meantime, we’re happy to walk you through relevant examples on a call.</p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <CtaBand where="work" heading="Want to see examples like yours?" />
+</Base>
+<style>
+  .cases { list-style: none; display: grid; gap: var(--space-m); grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); }
+  .cases a { display: grid; gap: var(--space-s); padding: var(--space-l); border: 1px solid var(--ink-700); text-decoration: none; height: 100%; transition: border-color 0.2s; }
+  .cases a:hover { border-color: var(--cyan-400); }
+  .cases__stat { font-weight: 700; margin-top: var(--space-s); }
+  .cases__stat .accent { font-size: var(--step-3); font-weight: 800; display: block; }
+  .empty { max-width: 48ch; display: grid; gap: var(--space-s); }
+</style>

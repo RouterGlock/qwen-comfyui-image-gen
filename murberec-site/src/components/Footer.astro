@@ -1,0 +1,83 @@
+---
+import { site, nav, telHref, hasAddress } from '../data/site';
+import { services } from '../data/services';
+const year = new Date().getFullYear();
+const a = site.address;
+---
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__top">
+      <div class="footer__big" aria-hidden="true" data-text="MURBEREC"></div>
+      <div class="footer__cta">
+        <p class="h3">Ready when you are.</p>
+        <a class="btn" href={site.primaryCta.href} data-track="cta_click" data-track-where="footer">
+          {site.primaryCta.label} <span class="arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer__cols">
+      <nav aria-label="Footer: directory">
+        <h2 class="mono muted">Directory</h2>
+        <ul>
+          <li><a href="/">Home</a></li>
+          {nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+          <li><a href="/contact">Let’s Converse</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Footer: services">
+        <h2 class="mono muted">Services</h2>
+        <ul>
+          {services.map((s) => <li><a href={`/services/${s.slug}`}>{s.title}</a></li>)}
+        </ul>
+      </nav>
+      <div>
+        <h2 class="mono muted">Contact</h2>
+        <ul>
+          {site.email && <li><a href={`mailto:${site.email}`}>{site.email}</a></li>}
+          {site.phone && <li><a href={telHref(site.phone)}>{site.phone}</a></li>}
+          <li><a href="/contact">Send us a message</a></li>
+        </ul>
+        {hasAddress() && (
+          <address>
+            {a.street}<br />{a.locality}, {a.region} {a.postalCode}
+          </address>
+        )}
+      </div>
+      {site.social.length > 0 && (
+        <nav aria-label="Footer: social">
+          <h2 class="mono muted">Follow</h2>
+          <ul>{site.social.map((s) => <li><a href={s.href} rel="me noopener" target="_blank">{s.label}</a></li>)}</ul>
+        </nav>
+      )}
+    </div>
+
+    <div class="footer__legal mono muted">
+      <p>© {year} {site.name}. All rights reserved.</p>
+      <p><a href="/privacy">Privacy policy</a></p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer { background: var(--ink-900); border-top: 1px solid var(--ink-800); padding-block: var(--space-xl) var(--space-l); }
+  .footer__top { display: grid; gap: var(--space-l); padding-bottom: var(--space-xl); border-bottom: 1px solid var(--ink-700); }
+  .footer__big {
+    font-size: clamp(3.5rem, 15.5vw, 16rem); font-weight: 800; letter-spacing: -0.06em; line-height: 0.8;
+    color: var(--ink-800); user-select: none; white-space: nowrap;
+  }
+  .footer__big::before { content: attr(data-text); }
+  .footer__big::after { content: '®'; font-size: 0.25em; vertical-align: top; color: var(--cyan-400); margin-left: 0.1em; }
+  .footer__cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-m); }
+  .footer__cols {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--space-l);
+    padding-block: var(--space-xl);
+  }
+  .footer__cols h2 { font-weight: 400; margin-bottom: var(--space-s); letter-spacing: 0.04em; font-size: var(--step--1); line-height: 1.4; }
+  .footer__cols ul { list-style: none; display: grid; gap: 0.35rem; }
+  .footer__cols a { text-decoration: none; }
+  .footer__cols a:hover { color: var(--cyan-400); text-decoration: underline; }
+  .footer address { font-style: normal; margin-top: var(--space-s); color: var(--gray-400); }
+  .footer__legal { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-s); padding-top: var(--space-m); border-top: 1px solid var(--ink-700); }
+  .footer__legal a:hover { color: var(--cyan-400); }
+</style>

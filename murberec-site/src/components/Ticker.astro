@@ -1,0 +1,18 @@
+---
+import { site } from '../data/site';
+const items = site.ticker;
+---
+<div class="ticker" role="marquee" aria-label={items.join(', ')}>
+  <div class="ticker__track">
+    {[0, 1].map(() => (
+      <div class="ticker__group" aria-hidden="true">
+        {[...items, ...items].map((t, i) => (
+          <span class="ticker__pair" data-dup={i >= items.length ? '' : undefined}>
+            <span class="ticker__item">{t}</span>
+            <span class="ticker__dot">●</span>
+          </span>
+        ))}
+      </div>
+    ))}
+  </div>
+</div>
