@@ -128,6 +128,26 @@ const next = () => ++n;
     </section>
   )}
 
+  {hasTriptych ? (
+    <Triptych num={next()} label="Content development arm · Xtudio™"
+      body="eLearning, marketing, and social storytelling, engineered people-first by Murberec®."
+      cta={{ label: 'Step inside Xtudio', href: '/xtudio' }} />
+  ) : (
+    <section class="section xt" aria-labelledby="xtudio-title">
+      <div class="wrap xt__grid">
+        <div>
+          <SectionHead num={next()} label="Content development arm" />
+          <h2 id="xtudio-title" class="display reveal">Xtudio<sup class="accent">™</sup></h2>
+        </div>
+        <div class="xt__body reveal">
+          <p class="h3">Content that inspires <span class="accent">action.</span></p>
+          <p class="lede muted">eLearning, marketing, and social storytelling, engineered people-first by Murberec®.</p>
+          <a class="link-arrow" href="/xtudio">Step inside Xtudio →</a>
+        </div>
+      </div>
+    </section>
+  )}
+
   <section class="section light clients" aria-labelledby="clients-title">
     <div class="wrap">
       <SectionHead num={next()} label="Selected experience" />
@@ -163,25 +183,7 @@ const next = () => ++n;
     </section>
   )}
 
-  {hasTriptych ? (
-    <Triptych num={next()} label="Content development arm · Xtudio™"
-      body="eLearning, marketing, and social storytelling, engineered people-first by Murberec®."
-      cta={{ label: 'Step inside Xtudio', href: '/xtudio' }} />
-  ) : (
-    <section class="section xt" aria-labelledby="xtudio-title">
-      <div class="wrap xt__grid">
-        <div>
-          <SectionHead num={next()} label="Content development arm" />
-          <h2 id="xtudio-title" class="display reveal">Xtudio<sup class="accent">™</sup></h2>
-        </div>
-        <div class="xt__body reveal">
-          <p class="h3">Content that inspires <span class="accent">action.</span></p>
-          <p class="lede muted">eLearning, marketing, and social storytelling, engineered people-first by Murberec®.</p>
-          <a class="link-arrow" href="/xtudio">Step inside Xtudio →</a>
-        </div>
-      </div>
-    </section>
-  )}
+
 
   <CtaBand where="home" />
 </Base>
