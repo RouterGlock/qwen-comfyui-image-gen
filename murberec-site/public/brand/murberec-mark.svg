@@ -1,13 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#09090B"/><g transform="translate(9 9) scale(0.4259)" color="#FAF9F5">
-  
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 108 108" role="img" aria-label="MURBEREC">
+  <!-- Synapse M: angular M, cyan node firing where the strokes meet. Ink uses currentColor. -->
   <defs>
-    <mask id="mm-cut-f" maskUnits="userSpaceOnUse" x="-4" y="-4" width="108" height="108">
+    <mask id="mm-cut" maskUnits="userSpaceOnUse" x="-4" y="-4" width="108" height="108">
       <rect x="-4" y="-4" width="108" height="108" fill="#fff"/>
       <circle cx="50" cy="58" r="10.2" fill="#000"/>
       <path d="M36 63.5 50 58 64 63.5" fill="none" stroke="#000" stroke-width="5.2" stroke-linecap="round"/>
     </mask>
   </defs>
-  <path mask="url(#mm-cut-f)" fill="currentColor"
+  <path mask="url(#mm-cut)" fill="currentColor"
         d="M0 0 50 58 100 0 100 86 78 100 78 53.5 50 86 22 53.5 22 100 0 86Z"/>
   <path d="M50 58V41" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
   <circle cx="50" cy="38.5" r="3.6" fill="currentColor"/>
@@ -15,4 +15,4 @@
   <circle cx="36" cy="63.5" r="3.6" fill="#23D2E2"/>
   <circle cx="64" cy="63.5" r="3.6" fill="#23D2E2"/>
   <circle cx="50" cy="58" r="7.8" fill="#23D2E2"/>
-</g></svg>
+</svg>
