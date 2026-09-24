@@ -12,15 +12,9 @@ ComfyUI, stacked side by side ( | | | ) with the Xtudio logo on top.
 All three share one look (low-key, deep blacks, cyan brand light, warm skin)
 so they read as a set. Full prompts are in `prompts.json`; edit them there.
 
-## ⚠️ Read before using these on Marc's site
+## Licence
 
-The MiniMax H3 weights ship under **MiniMax's own licence, which excludes the
-US, EU, UK and South Korea** (see the licence note in the
-minimax-h3-comfyui-video README). MURBEREC® is a US business and this is
-commercial use. **Read the H3 licence yourself before these clips go on the
-live site.** If it doesn't allow this use, the same prompts work on a
-commercially licensed video tool, and `compose.sh` and the website section
-work with any three portrait clips dropped into `renders/`.
+MiniMax H3 licence use for this project has been confirmed by the owner.
 
 ## Run it on your Mac
 
@@ -74,5 +68,6 @@ web sizes but can't add detail the model didn't render. For true HD detail,
 use `--hd` (if your Mac has the memory) or run the clips through an AI
 upscaler before `compose.sh`.
 
-**Logo:** `xtudio-logo.png` is a placeholder wordmark in the site's font.
-Swap in Marc's real logo (transparent PNG, light version) with `LOGO=...`.
+**Logo:** `xtudio-logo.png` is a redraw of the Xtudio™ by Murberec® logo in
+the brand yellow (#EFEB02), set in Knewave and Oswald (both SIL Open Font
+License). Swap in an original file any time with `LOGO=...`.
