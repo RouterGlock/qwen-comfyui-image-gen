@@ -4,6 +4,7 @@ import SectionHead from '../components/SectionHead.astro';
 import Ticker from '../components/Ticker.astro';
 import CtaBand from '../components/CtaBand.astro';
 import NeuralField from '../components/NeuralField.astro';
+import LogoMarquee from '../components/LogoMarquee.astro';
 import { site } from '../data/site';
 import { services, approach } from '../data/services';
 import { caseStudies } from '../data/work';
@@ -111,21 +112,17 @@ const next = () => ++n;
     </section>
   )}
 
-  <section class="section" aria-labelledby="clients-title">
+  <section class="section light clients" aria-labelledby="clients-title">
     <div class="wrap">
-      <SectionHead num={next()} label="Who we work with" />
-      <h2 id="clients-title" class="h2 reveal">Enterprise teams across <span class="accent">five sectors.</span></h2>
-      {site.clients.length > 0 ? (
-        <ul class="logos">
-          {site.clients.map((c) => (
-            <li><img src={c.logo} alt={c.name} width="160" height="60" loading="lazy" decoding="async" /></li>
-          ))}
-        </ul>
-      ) : (
-        <ul class="industries mono">
-          {site.industries.map((ind) => <li>{ind}</li>)}
-        </ul>
-      )}
+      <SectionHead num={next()} label="Selected experience" />
+      <p class="mono muted">Proof of work</p>
+      <h2 id="clients-title" class="h2 clients__title reveal">Our team has<br />delivered <span class="accent">for.</span></h2>
+    </div>
+    {site.clients.length > 0 && <LogoMarquee />}
+    <div class="wrap">
+      <ul class="industries mono" aria-label="Industries">
+        {site.industries.map((ind) => <li>{ind}</li>)}
+      </ul>
     </div>
   </section>
 
@@ -189,10 +186,9 @@ const next = () => ++n;
   .impact__title { max-width: 18ch; margin-bottom: var(--space-xl); }
 
   .industries { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-s); margin-top: var(--space-l); }
-  .industries li { border: 1px solid var(--ink-700); padding: 0.7rem 1.1rem; border-radius: 999px; }
-  .logos { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--space-l); align-items: center; margin-top: var(--space-l); }
-  .logos img { filter: grayscale(1) brightness(1.6); opacity: 0.8; transition: all 0.3s; }
-  .logos img:hover { filter: none; opacity: 1; }
+  .clients { background: #fff; }
+  .clients__title { margin-block: var(--space-s) var(--space-l); }
+  .industries li { border: 1px solid var(--paper-200); padding: 0.7rem 1.1rem; border-radius: 999px; }
 
   .quotes { display: grid; gap: var(--space-xl); }
   .quotes figure { margin: 0; display: grid; gap: var(--space-m); }

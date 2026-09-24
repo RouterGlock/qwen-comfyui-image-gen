@@ -25,7 +25,7 @@ Almost everything lives in **`src/data/site.ts`**. Search the repo for
 
 | # | Item | Where |
 |---|---|---|
-| 9 | **Approved client logos** (SVG preferred) + names | `site.ts` → `clients`, files in `public/clients/`. The industry list shows until then. |
+| 9 | **Client logos**: the 12 from the current site are in, auto-scrolling on Home. They're cropped from screenshots, so replace them with the original files (same file names, SVG or 2x PNG) for sharper edges | `public/clients/`, list in `site.ts` → `clients` |
 | 10 | **2–4 case studies**: problem → approach → measurable result | `src/data/work.ts` (commented example inside). Home teaser + `/work/[slug]` pages appear automatically. |
 | 11 | **Testimonials**: quote, name, role, company (with permission) | `site.ts` → `testimonials`. Section appears on Home. |
 | 12 | **Xtudio triptych**: 3 clips rendered; clip 3 being re-rendered (see `xtudio-reel/README.md`). MiniMax H3 licence confirmed by owner | `xtudio-reel/`. The "Content that inspires action" section on the Xtudio page appears once the files exist. |
