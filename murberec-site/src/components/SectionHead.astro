@@ -1,8 +1,10 @@
 ---
+/** Section meta row: number (left), label (centre), year or status (right), under a 1px rule that draws in. */
 interface Props { num: number; label: string; aside?: string }
-const { num, label, aside } = Astro.props;
+const { num, label, aside = String(new Date().getFullYear()) } = Astro.props;
 ---
-<div class="sec-head mono">
-  <p><span class="num">({String(num).padStart(2, '0')})</span> {label}</p>
-  {aside && <p class="muted">{aside}</p>}
+<div class="sec-head mono reveal" data-bleed>
+  <p><span class="num">({String(num).padStart(2, '0')})</span></p>
+  <p class="sec-head__label">{label}</p>
+  <p class="muted">{aside}</p>
 </div>

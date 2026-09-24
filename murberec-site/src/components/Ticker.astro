@@ -1,15 +1,21 @@
 ---
+/**
+ * Accent ticker. The phrases are rendered four times (two groups of two) so
+ * the -50% loop is seamless on wide screens; all copies are aria-hidden and
+ * the container carries the text once as its label. It is focusable so
+ * keyboard users can pause it (WCAG 2.2.2).
+ */
 import { site } from '../data/site';
 const items = site.ticker;
 ---
-<div class="ticker" role="marquee" aria-label={items.join(', ')}>
+<div class="ticker" role="marquee" tabindex="0" aria-label={`${items.join(', ')} (focus to pause)`}>
   <div class="ticker__track">
     {[0, 1].map(() => (
       <div class="ticker__group" aria-hidden="true">
         {[...items, ...items].map((t, i) => (
           <span class="ticker__pair" data-dup={i >= items.length ? '' : undefined}>
             <span class="ticker__item">{t}</span>
-            <span class="ticker__dot">●</span>
+            <span class="ticker__dot">•</span>
           </span>
         ))}
       </div>
