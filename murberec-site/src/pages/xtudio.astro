@@ -4,8 +4,15 @@ import PageHero from '../components/PageHero.astro';
 import CtaBand from '../components/CtaBand.astro';
 import SectionHead from '../components/SectionHead.astro';
 import NeuralField from '../components/NeuralField.astro';
+import Triptych from '../components/Triptych.astro';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 const crumbs = [{ name: 'Xtudio®', path: '/xtudio' }];
+// The triptych section only renders once compose.sh has produced its files.
+const hasTriptych = existsSync(join(process.cwd(), 'public/xtudio/clip-1-learn.mp4'));
+let n = 0;
+const next = () => ++n;
 // TODO(owner): add real reels. Each entry needs a poster image, a video/embed URL and a short caption.
 const reels: { title: string; client: string; poster: string; src: string }[] = [];
 const disciplines = [
@@ -34,9 +41,11 @@ const disciplines = [
   <PageHero crumbs={crumbs} kicker="The content arm of MURBEREC®" title="Xtudio<sup class='accent xt-reg'>®</sup>"
     lede="Where the science becomes something people want to watch, click and share. We make learning, brand and digital content in-house, designed around how attention and memory actually work." />
 
+  {hasTriptych && <Triptych num={next()} />}
+
   <section class="section" aria-labelledby="xt-disc">
     <div class="wrap">
-      <SectionHead num={1} label="What we make" aside="3 disciplines" />
+      <SectionHead num={next()} label="What we make" aside="3 disciplines" />
       <h2 id="xt-disc" class="sr-only">Disciplines</h2>
       <ol class="xt-disc">
         {disciplines.map((d, i) => (
@@ -53,7 +62,7 @@ const disciplines = [
 
   <section class="section surface" aria-labelledby="xt-reel">
     <div class="wrap">
-      <SectionHead num={2} label="Selected work" />
+      <SectionHead num={next()} label="Selected work" />
       <h2 id="xt-reel" class="h2">The <span class="accent">reel.</span></h2>
       {reels.length > 0 ? (
         <ul class="reels">

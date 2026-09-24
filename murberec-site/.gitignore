@@ -3,3 +3,7 @@ dist/
 .astro/
 .wrangler/
 .dev.vars
+
+# Xtudio reel working files (large). The web copies in public/xtudio/ are committed.
+xtudio-reel/renders/
+xtudio-reel/out/

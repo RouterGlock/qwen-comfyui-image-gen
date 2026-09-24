@@ -1,0 +1,26 @@
+{
+  "_note": "Three 5 s portrait clips for the Xtudio 'Content That Inspires Action' triptych. Written in MiniMax H3's single-block format (look, scene, timestamped beats, camera, audio). All three share one grade (low-key, deep blacks, cyan #23D2E2 practical light, warm skin) so they read as a set side by side. No on-screen text or logos: video models garble lettering, and the real Xtudio logo is overlaid afterwards.",
+  "clips": [
+    {
+      "id": "clip-1-learn",
+      "title": "Learn: the moment it clicks",
+      "discipline": "eLearning & LXD",
+      "seed": 23081,
+      "prompt": "Realistic live-action cinematic footage, shot on 35mm anamorphic lens, shallow depth of field, soft film grain, low-key lighting with deep blacks, a cool cyan screen glow as the key light and a warm practical lamp as fill, natural skin texture, 4K commercial look. Vertical frame. A focused young professional woman in her late twenties sits alone at a desk in a dark modern studio at night, her face lit by the cyan glow of an unseen screen; soft abstract reflections of moving light play across her glasses. [0s-2s] She leans in slightly, eyes tracking something on the screen, brow gently furrowed in concentration. [2s-4s] Her expression shifts as the idea lands: her eyes widen a little and a quiet, genuine smile forms. [4s-5s] She sits back, exhales, and nods to herself, the cyan light catching the edge of her face. Camera: slow, steady push-in from a medium close-up to a close-up, locked at eye level, focus holding on her eyes. Audio: soft room tone, faint keyboard taps, a warm low synth pad that swells gently as she smiles, one relaxed exhale, no dialogue, no music vocals."
+    },
+    {
+      "id": "clip-2-think",
+      "title": "Think: the brain behind the behavior",
+      "discipline": "Neuroscience lens",
+      "seed": 40417,
+      "prompt": "Realistic live-action cinematic macro footage, 100mm macro lens, extreme shallow depth of field, ultra-detailed, low-key lighting, deep blacks, cyan rim light, subtle film grain, high-end commercial look. Vertical frame. An extreme close-up of a human eye in near darkness, every fibre of the iris in crisp detail, with tiny points of cyan light reflected on the glossy surface of the eye. [0s-2s] The eye is still, the pupil wide in the dark; the reflected points of light drift slowly across the cornea. [2s-4s] The points of light begin to connect into a delicate branching network, like neurons firing, reflected across the iris; the pupil contracts smoothly as the light brightens. [4s-5s] A single slow blink, then the eye opens again, sharper and brighter, the cyan network glowing softly in the reflection. Camera: locked-off macro with an extremely slow push-in and a subtle rack focus from the eyelashes to the iris. Audio: deep quiet ambience, a soft rising electrical shimmer as the light network forms, a faint heartbeat-like low pulse, a gentle whoosh on the blink, no dialogue."
+    },
+    {
+      "id": "clip-3-lead",
+      "title": "Lead: change that people choose",
+      "discipline": "Brand storytelling & leadership",
+      "seed": 77153,
+      "prompt": "Realistic live-action cinematic footage, 35mm anamorphic lens, shallow depth of field, soft film grain, low-key lighting with deep blacks, warm tungsten key light and a cool cyan rim light from behind, natural skin texture, 4K commercial look. Vertical frame. A confident Black woman in her mid-forties, a team leader in a dark charcoal blazer, stands in a dim modern workshop space facing her team, who are soft and out of focus in the foreground. [0s-2s] She listens attentively, then smiles warmly and begins to speak, one open hand gesturing toward the team. [2s-4s] In the soft-focus foreground, team members nod and one leans forward, engaged; she steps half a pace closer, calm and encouraging. [4s-5s] She holds eye contact with the group, a small confident nod, the cyan rim light outlining her silhouette. Camera: slow lateral dolly from left to right past the out-of-focus shoulders of the team, ending on a medium close-up of her, eye level. Audio: soft room tone, the low murmur of an engaged team, a light warm piano note and low pad building gently, her voice heard only as an indistinct calm murmur, no clear words."
+    }
+  ]
+}
