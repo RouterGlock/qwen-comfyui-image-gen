@@ -179,9 +179,11 @@ li { align-content: start; }
 
 /* ---------- Stats ---------- */
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: 0; }
-.stat { padding: var(--space-l) var(--space-m) var(--space-l) 0; border-top: 1px solid currentColor; }
+.stat { display: flex; flex-direction: column; padding: var(--space-l) var(--space-m) var(--space-l) 0; border-top: 1px solid currentColor; }
 .stat__value { margin: 0; font-size: var(--step-5); font-weight: 800; letter-spacing: -0.05em; line-height: 0.9; }
-.stat__label { margin-top: var(--space-s); }
+.stat__label { margin-top: var(--space-s); max-width: 30ch; font-weight: 600; line-height: 1.35; }
+.stat__value { order: -1; }
+.stat__tag { margin-top: var(--space-xs); }
 
 /* ---------- Cards ---------- */
 .card-list { list-style: none; display: grid; gap: 0; }

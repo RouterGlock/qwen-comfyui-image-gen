@@ -35,7 +35,8 @@ let n = 0;
 const next = () => ++n;
 ---
 <Base title={service.seoTitle} description={service.seoDescription} crumbs={crumbs} schema={[serviceSchema]}>
-  <PageHero crumbs={crumbs} kicker={`Service 0${idx + 1} / 04`} title={service.title} lede={service.lede}>
+  <PageHero crumbs={crumbs} kicker={`Service 0${idx + 1} / 04`} title={`${service.title}<span class='sr-only'>: </span><span class='svc-tagline'>${service.summary}</span>`} lede={service.lede}>
+    <ul class="svc-focus mono" aria-label="Focus areas">{service.focus.map((f) => <li>/ {f}</li>)}</ul>
     <a class="btn svc-cta" href={site.primaryCta.href} data-track="cta_click" data-track-where={`service-${service.slug}`}>
       {site.primaryCta.label} <span class="arrow" aria-hidden="true">→</span>
     </a>
@@ -100,6 +101,8 @@ const next = () => ++n;
 </Base>
 <style>
   .svc-cta { margin-top: var(--space-l); }
+  :global(.svc-tagline) { display: block; margin-top: var(--space-s); font-size: 0.42em; letter-spacing: -0.02em; line-height: 1.1; color: var(--cyan-400); text-transform: none; }
+  .svc-focus { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; margin-top: var(--space-m); color: var(--paper-100); }
   .split { display: grid; gap: var(--space-l); }
   @media (min-width: 60rem) { .split { grid-template-columns: 1fr 1fr; align-items: start; } }
   .signals { list-style: none; display: grid; }

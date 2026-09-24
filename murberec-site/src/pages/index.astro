@@ -3,7 +3,8 @@ import Base from '../layouts/Base.astro';
 import SectionHead from '../components/SectionHead.astro';
 import Ticker from '../components/Ticker.astro';
 import CtaBand from '../components/CtaBand.astro';
-import NeuralField from '../components/NeuralField.astro';
+import { Picture } from 'astro:assets';
+import heroImage from '../assets/hero-human-mind.png';
 import LogoMarquee from '../components/LogoMarquee.astro';
 import { site } from '../data/site';
 import { services, approach } from '../data/services';
@@ -18,13 +19,16 @@ const next = () => ++n;
   description="MURBEREC® is a people-first consulting firm that uses neuroscience to design leadership development, learning experiences and change programs that stick. Book a 30-min discovery call."
 >
   <section class="hero" aria-labelledby="hero-title">
+    <Picture src={heroImage} alt="" class="hero__bg" formats={['avif', 'webp']} fallbackFormat="jpg" quality={72}
+      widths={[640, 960, 1280, 1920, 2560]} sizes="100vw" loading="eager" fetchpriority="high" />
     <div class="wrap hero__grid">
       <div class="hero__copy">
-        <p class="mono muted hero__kicker">People-first consulting <span class="accent">/</span> grounded in neuroscience</p>
-        <h1 id="hero-title" class="display">Optimal human <span class="accent">performance.</span></h1>
+        <p class="mono muted hero__kicker">(The human advantage)</p>
+        <h1 id="hero-title" class="h1 hero__title">The human mind is the most powerful tool. <span class="accent">Unleashing it is what we do.</span></h1>
+        <p class="mono hero__sub">Neuroscience leadership transformation <span class="accent">/</span> advancing human performance</p>
         <p class="lede hero__lede">
-          We help leadership, HR and L&amp;D teams change how people lead, learn and work.
-          Every program is built from scratch around how the brain actually changes, and we stay until it sticks.
+          People-first consulting for organizations ready to grow with intention. We develop leaders,
+          design learning and lead change around how people actually think, and we stay until it sticks.
         </p>
         <div class="hero__actions">
           <a class="btn" href={site.primaryCta.href} data-track="cta_click" data-track-where="hero">
@@ -32,9 +36,6 @@ const next = () => ++n;
           </a>
           <a class="btn btn--ghost" href="#approach">How we work</a>
         </div>
-      </div>
-      <div class="hero__art">
-        <NeuralField />
       </div>
     </div>
   </section>
@@ -45,7 +46,13 @@ const next = () => ++n;
     <div class="wrap">
       <SectionHead num={next()} label="Our approach" aside="Diagnose → Design → Embed" />
       <div class="approach">
-        <h2 id="approach-title" class="h1 reveal">No templates.<br /><span class="muted">No playbooks.</span></h2>
+        <div class="approach__intro">
+          <h2 id="approach-title" class="h1 reveal">No templates.<br /><span class="muted">No playbooks.</span></h2>
+          <div class="reveal">
+            <p class="h3">Your people are unlike any other. Your solutions should be the same.</p>
+            <p class="muted approach__body">Every organization has its own strategy, culture, and human dynamics. We use neuroscience as a lens, not a formula, to design experiences that move people from knowing to doing.</p>
+          </div>
+        </div>
         <ol class="approach__steps">
           {approach.map((a, i) => (
             <li class="reveal" style={`transition-delay:${i * 90}ms`}>
@@ -61,7 +68,7 @@ const next = () => ++n;
 
   <section class="section surface" aria-labelledby="services-title">
     <div class="wrap">
-      <SectionHead num={next()} label="What we do" aside="4 disciplines" />
+      <SectionHead num={next()} label="Capabilities" aside="4 / systems" />
       <h2 id="services-title" class="sr-only">Services</h2>
       <ul class="card-list">
         {services.map((s, i) => (
@@ -70,7 +77,9 @@ const next = () => ++n;
               <span class="mono muted">0{i + 1}</span>
               <span>
                 <h3 class="row-card__title">{s.title}</h3>
-                <p class="row-card__body muted">{s.summary}</p>
+                <p class="row-card__tagline">{s.summary}</p>
+                <p class="row-card__body muted">{s.lede}</p>
+                <ul class="row-card__focus mono muted" aria-label="Focus areas">{s.focus.map((f) => <li>/ {f}</li>)}</ul>
               </span>
               <span class="row-card__go" aria-hidden="true">→</span>
             </a>
@@ -82,13 +91,14 @@ const next = () => ++n;
 
   <section class="section light" aria-labelledby="impact-title">
     <div class="wrap">
-      <SectionHead num={next()} label="Impact" />
+      <SectionHead num={next()} label="Our impact" />
       <h2 id="impact-title" class="h2 impact__title reveal">A decade of changing how people <span class="accent">work.</span></h2>
       <dl class="stats">
         {site.stats.map((s) => (
           <div class="stat reveal">
-            <dt class="mono muted stat__label">{s.label}</dt>
+            <dt class="stat__label">{s.label}</dt>
             <dd class="stat__value">{s.value}</dd>
+            {s.tag && <dd class="stat__tag mono muted">{s.tag}</dd>}
           </div>
         ))}
       </dl>
@@ -150,12 +160,13 @@ const next = () => ++n;
   <section class="section xt" aria-labelledby="xtudio-title">
     <div class="wrap xt__grid">
       <div>
-        <SectionHead num={next()} label="Our content arm" />
-        <h2 id="xtudio-title" class="display reveal">Xtudio<sup class="accent">®</sup></h2>
+        <SectionHead num={next()} label="Content development arm" />
+        <h2 id="xtudio-title" class="display reveal">Xtudio<sup class="accent">™</sup></h2>
       </div>
       <div class="xt__body reveal">
-        <p class="lede">Where the science becomes something people want to watch, click and share. eLearning, brand storytelling and digital content, made in-house.</p>
-        <a class="link-arrow" href="/xtudio">Step inside Xtudio® →</a>
+        <p class="h3">Content that inspires <span class="accent">action.</span></p>
+        <p class="lede muted">eLearning, marketing, and social storytelling, engineered people-first by Murberec®.</p>
+        <a class="link-arrow" href="/xtudio">Step inside Xtudio →</a>
       </div>
     </div>
   </section>
@@ -164,25 +175,35 @@ const next = () => ++n;
 </Base>
 
 <style>
-  .hero { padding-block: var(--space-xl) var(--space-2xl); position: relative; }
-  .hero__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-l); align-items: center; }
-  .hero__copy { position: relative; z-index: 1; }
-  .hero__kicker { margin-bottom: var(--space-m); }
-  .hero__lede { margin-top: var(--space-l); color: #d4d4d8; }
-  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-s); margin-top: var(--space-l); }
-  .hero__art { max-width: 34rem; margin-inline: auto; width: 100%; }
-  @media (min-width: 64rem) {
-    .hero { min-height: calc(100svh - 4.5rem - 4.6rem); display: grid; align-items: center; }
-    .hero__grid { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
-    .hero__art { margin-left: -12%; width: 112%; max-width: none; }
+  .hero { position: relative; isolation: isolate; overflow: hidden; padding-block: var(--space-xl); min-height: min(92svh, 60rem); display: grid; align-items: end; }
+  .hero :global(.hero__bg), .hero :global(.hero__bg img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 72% 30%; z-index: -2; }
+  .hero::after {
+    content: ''; position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(to top, var(--ink-950) 8%, rgb(9 9 11 / 0.75) 45%, rgb(9 9 11 / 0.2) 100%);
   }
-  @media (max-width: 63.99rem) { .hero__art { order: -1; max-width: 22rem; margin-block: -1rem -2rem; opacity: 0.9; } }
+  .hero__grid { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .hero__copy { max-width: 46rem; }
+  .hero__kicker { margin-bottom: var(--space-m); }
+  .hero__title { font-size: clamp(2.2rem, min(1.2rem + 3.3vw, 7vh), 4.4rem); }
+  .hero__sub { margin-top: var(--space-l); color: var(--paper-100); }
+  .hero__lede { margin-top: var(--space-m); color: #d4d4d8; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-s); margin-top: var(--space-l); }
+  @media (min-width: 64rem) {
+    .hero { align-items: center; }
+    .hero::after { background: linear-gradient(90deg, var(--ink-950) 0%, rgb(9 9 11 / 0.88) 38%, rgb(9 9 11 / 0.25) 70%, rgb(9 9 11 / 0.1) 100%), linear-gradient(to top, var(--ink-950), transparent 30%); }
+  }
 
   .approach { display: grid; gap: var(--space-xl); }
+  .approach__intro { display: grid; gap: var(--space-l); align-items: end; }
+  .approach__intro .h3 { max-width: 24ch; }
+  .approach__body { margin-top: var(--space-m); max-width: 52ch; }
+  @media (min-width: 60rem) { .approach__intro { grid-template-columns: 1fr 1fr; } }
   .approach__steps { list-style: none; display: grid; gap: var(--space-l); counter-reset: step; }
   .approach__steps li { display: grid; gap: var(--space-s); padding-top: var(--space-m); border-top: 1px solid var(--ink-700); }
   @media (min-width: 56rem) { .approach__steps { grid-template-columns: repeat(3, 1fr); } }
 
+  .row-card__tagline { margin-top: var(--space-s); font-size: var(--step-1); font-weight: 700; letter-spacing: -0.01em; }
+  .row-card__focus { list-style: none; display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; margin-top: var(--space-s); }
   .impact__title { max-width: 18ch; margin-bottom: var(--space-xl); }
 
   .industries { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-s); margin-top: var(--space-l); }

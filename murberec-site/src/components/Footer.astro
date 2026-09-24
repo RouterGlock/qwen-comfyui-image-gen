@@ -9,7 +9,7 @@ const a = site.address;
     <div class="footer__top">
       <div class="footer__big" aria-hidden="true" data-text="MURBEREC"></div>
       <div class="footer__cta">
-        <p class="h3">Ready when you are.</p>
+        <p class="h3 footer__tagline">{site.tagline}</p>
         <a class="btn" href={site.primaryCta.href} data-track="cta_click" data-track-where="footer">
           {site.primaryCta.label} <span class="arrow" aria-hidden="true">→</span>
         </a>
@@ -68,6 +68,7 @@ const a = site.address;
   }
   .footer__big::before { content: attr(data-text); }
   .footer__big::after { content: '®'; font-size: 0.25em; vertical-align: top; color: var(--cyan-400); margin-left: 0.1em; }
+  .footer__tagline { max-width: 26ch; }
   .footer__cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-m); }
   .footer__cols {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--space-l);

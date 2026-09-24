@@ -8,7 +8,7 @@ import Triptych from '../components/Triptych.astro';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-const crumbs = [{ name: 'Xtudio®', path: '/xtudio' }];
+const crumbs = [{ name: 'Xtudio™', path: '/xtudio' }];
 // The triptych section only renders once compose.sh has produced its files.
 const hasTriptych = existsSync(join(process.cwd(), 'public/xtudio/clip-1-learn.mp4'));
 let n = 0;
@@ -17,36 +17,37 @@ const next = () => ++n;
 const reels: { title: string; client: string; poster: string; src: string }[] = [];
 const disciplines = [
   {
-    title: 'eLearning & LXD',
-    body: 'Custom eLearning and learning experience design, built on the same science as our consulting. Interactive, scenario-based and designed to be remembered.',
+    title: 'E-learning & learning experience design',
+    body: 'Learning built to move people from knowing to doing: clear, engaging, and designed for real work.',
     items: ['Interactive modules', 'Scenario & branching design', 'Microlearning', 'Video-based learning'],
   },
   {
-    title: 'Marketing & brand storytelling',
-    body: 'Stories that make people feel something, because emotion is what the brain remembers. Brand films, campaigns and narrative strategy.',
+    title: 'High-impact marketing & brand storytelling',
+    body: 'Ideas translated into stories that earn attention, sharpen your message, and move audiences to act.',
     items: ['Brand films', 'Campaign concepts', 'Narrative strategy', 'Motion design'],
   },
   {
-    title: 'Social & digital content',
-    body: 'Content made for the feed and the attention span. Short-form video, social campaigns and digital assets that earn the scroll-stop.',
+    title: 'Social media & digital engagement',
+    body: 'Platform-native content systems that build relevance, momentum, and meaningful community.',
     items: ['Short-form video', 'Social campaigns', 'Digital assets', 'Content systems'],
   },
 ];
 ---
 <Base
-  title="Xtudio® | eLearning, Brand Storytelling & Digital Content"
-  description="Xtudio® is the content arm of MURBEREC®: custom eLearning and learning experience design, brand storytelling and social content, all grounded in how people pay attention."
+  title="Xtudio™ | eLearning, Brand Storytelling & Digital Content"
+  description="Xtudio™ is the content development arm of MURBEREC®: e-learning and learning experience design, high-impact brand storytelling, and social media content, engineered people-first."
   crumbs={crumbs}
 >
-  <PageHero crumbs={crumbs} kicker="The content arm of MURBEREC®" title="Xtudio<sup class='accent xt-reg'>®</sup>"
-    lede="Where the science becomes something people want to watch, click and share. We make learning, brand and digital content in-house, designed around how attention and memory actually work." />
+  <PageHero crumbs={crumbs} kicker="Content / Motion / Learning" title="Xtudio<sup class='accent xt-reg'>™</sup>"
+    lede="We've been pioneering content development for over a decade. Let us create impactful and captivating content that will enthrall users, increase subscribers and galvanize employees for years to come." />
 
   {hasTriptych && <Triptych num={next()} />}
 
   <section class="section" aria-labelledby="xt-disc">
     <div class="wrap">
       <SectionHead num={next()} label="What we make" aside="3 disciplines" />
-      <h2 id="xt-disc" class="sr-only">Disciplines</h2>
+      <h2 id="xt-disc" class="h2 xt-disc__title">Three disciplines.<br />One human-centered <span class="accent">studio.</span></h2>
+      <p class="lede muted xt-disc__sub">Stories designed to move people.</p>
       <ol class="xt-disc">
         {disciplines.map((d, i) => (
           <li class="reveal">
@@ -85,10 +86,12 @@ const disciplines = [
     </div>
   </section>
 
-  <CtaBand where="xtudio" heading="Have a story to tell?" body="From a single eLearning module to a full brand campaign, start with a 30-minute conversation about what you need people to feel, know and do." />
+  <CtaBand where="xtudio" heading="Built for movement." body="Optimize your employees. Get more users. Reignite your customer base." />
 </Base>
 <style>
   :global(.xt-reg) { font-size: 0.35em; vertical-align: top; }
+  .xt-disc__title { max-width: 18ch; }
+  .xt-disc__sub { margin: var(--space-s) 0 var(--space-xl); }
   .xt-disc { list-style: none; display: grid; gap: var(--space-l); }
   .xt-disc > li { display: grid; gap: var(--space-s); align-content: start; border-top: 1px solid var(--ink-700); padding-top: var(--space-m); }
   .xt-disc ul { list-style: none; display: grid; gap: 0.3rem; margin-top: var(--space-s); }
