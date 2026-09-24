@@ -1,0 +1,8 @@
+# Old Framer URLs -> new structure (301 = permanent, keeps search ranking)
+/x-studio        /xtudio   301
+/x-studio/*      /xtudio   301
+/about-us        /about    301
+/about-us/*      /about    301
+/lets-converse   /contact  301
+/lets-converse/* /contact  301
+/home            /         301

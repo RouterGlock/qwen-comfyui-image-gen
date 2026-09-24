@@ -1,0 +1,89 @@
+---
+import { nav, site } from '../data/site';
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => path === href || path.startsWith(href + '/');
+---
+<header class="nav">
+  <div class="wrap nav__inner">
+    <a class="nav__logo" href="/" aria-label={`${site.shortName} home`}>
+      MURBEREC<sup>®</sup>
+    </a>
+
+    <button class="nav__toggle mono" type="button" aria-expanded="false" aria-controls="nav-menu">
+      <span class="nav__toggle-label">Menu</span>
+    </button>
+
+    <nav id="nav-menu" class="nav__menu" aria-label="Main">
+      <ul>
+        {nav.map((item, i) => (
+          <li>
+            <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+              <span class="mono nav__num" aria-hidden="true">0{i + 1}</span>
+              <span>{item.label}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <a class="btn nav__cta" href={site.primaryCta.href} data-track="cta_click" data-track-where="nav">
+        Book a discovery call <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--ink-950) 82%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+            backdrop-filter: blur(14px) saturate(1.4);
+    border-bottom: 1px solid var(--ink-800);
+  }
+  .nav__inner { display: flex; align-items: center; justify-content: space-between; min-height: 4.5rem; gap: var(--space-m); }
+  .nav__logo { font-weight: 800; font-size: 1.35rem; letter-spacing: -0.04em; text-decoration: none; }
+  .nav__logo sup { font-size: 0.5em; font-weight: 500; color: var(--cyan-400); }
+  .nav__menu { display: flex; align-items: center; gap: var(--space-l); }
+  .nav__menu ul { list-style: none; display: flex; gap: var(--space-m); }
+  .nav__menu ul a {
+    display: inline-flex; gap: 0.4em; align-items: baseline; padding-block: 0.5rem;
+    text-decoration: none; font-weight: 600; font-size: 0.95rem;
+  }
+  .nav__num { color: var(--gray-400); font-size: 0.7rem; }
+  .nav__menu ul a:hover, .nav__menu ul a[aria-current='page'] { color: var(--cyan-400); }
+  .nav__menu ul a[aria-current='page'] .nav__num { color: var(--cyan-400); }
+  .nav__cta { min-height: 42px; padding: 0.6rem 1rem; }
+  .nav__toggle { display: none; }
+
+  @media (max-width: 60rem) {
+    .nav__toggle {
+      display: inline-flex; align-items: center; min-height: 44px; padding: 0 1rem;
+      background: none; color: inherit; border: 1px solid var(--ink-700); border-radius: var(--radius); cursor: pointer;
+    }
+    .nav__menu {
+      display: none; position: absolute; inset: 100% 0 auto 0; height: calc(100dvh - 4.5rem);
+      flex-direction: column; align-items: stretch; justify-content: space-between;
+      padding: var(--space-l) var(--gutter); background: var(--ink-950); overflow-y: auto;
+    }
+    .nav[data-open] .nav__menu { display: flex; }
+    .nav__menu ul { flex-direction: column; gap: 0; }
+    .nav__menu ul a { font-size: var(--step-3); font-weight: 800; text-transform: uppercase; letter-spacing: -0.03em; padding-block: 0.6rem; }
+    .nav__cta { justify-content: center; min-height: 52px; }
+  }
+</style>
+
+<script>
+  const nav = document.querySelector<HTMLElement>('.nav')!;
+  const toggle = nav.querySelector<HTMLButtonElement>('.nav__toggle')!;
+  const label = toggle.querySelector('.nav__toggle-label')!;
+  const setOpen = (open: boolean) => {
+    toggle.setAttribute('aria-expanded', String(open));
+    nav.toggleAttribute('data-open', open);
+    label.textContent = open ? 'Close' : 'Menu';
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+  toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && nav.hasAttribute('data-open')) { setOpen(false); toggle.focus(); }
+  });
+  matchMedia('(min-width: 60.0625rem)').addEventListener('change', (e) => e.matches && setOpen(false));
+</script>

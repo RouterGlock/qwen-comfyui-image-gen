@@ -1,0 +1,45 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { site } from '../data/site';
+const crumbs = [{ name: 'Privacy', path: '/privacy' }];
+// TODO(owner): have this reviewed by counsel before launch and set the date.
+const updated = 'September 2026';
+const contact = site.email ? `<a href="mailto:${site.email}">${site.email}</a>` : 'the contact form on our <a href="/contact">Let’s Converse</a> page';
+---
+<Base title="Privacy Policy" description="How MURBEREC® collects, uses and protects the personal information you share with us." crumbs={crumbs}>
+  <PageHero crumbs={crumbs} kicker={`Last updated ${updated}`} title="Privacy policy" />
+  <section class="section">
+    <div class="wrap prose">
+      <p>This policy explains what personal information {site.name} (“we”, “us”) collects through this website, how we use it, and the choices you have.</p>
+
+      <h2>What we collect</h2>
+      <ul>
+        <li><strong>Information you give us.</strong> When you use our contact form we collect your name, organization or school, email address, the topic you choose and your message.</li>
+        <li><strong>Usage information.</strong> We use privacy-friendly analytics to understand which pages are visited and which buttons are used. This data is aggregated and is not used to identify you.</li>
+        <li><strong>Spam protection.</strong> Our form may use Cloudflare Turnstile, which processes limited technical data (such as your IP address and browser signals) to tell people from bots.</li>
+      </ul>
+
+      <h2>How we use it</h2>
+      <p>We use the information you send us only to reply to your enquiry, to arrange and hold a conversation with you, and to keep a record of our correspondence. We do not sell your personal information, and we do not add you to marketing lists without your consent.</p>
+
+      <h2>Who we share it with</h2>
+      <p>We use a small number of service providers to run this website and deliver form messages to us, including our hosting provider (Cloudflare) and our email delivery provider. They process data on our behalf and only as needed to provide their service.</p>
+
+      <h2>How long we keep it</h2>
+      <p>We keep enquiry messages for as long as needed to respond and to maintain a business relationship, and delete them when they are no longer needed.</p>
+
+      <h2>Your choices and rights</h2>
+      <p>You can ask us to access, correct or delete the personal information we hold about you. Depending on where you live, you may have additional rights under laws such as the GDPR or U.S. state privacy laws. To make a request, contact us using <Fragment set:html={contact} />.</p>
+
+      <h2>Cookies</h2>
+      <p>This site does not use advertising or cross-site tracking cookies.</p>
+
+      <h2>Changes</h2>
+      <p>If we change this policy we will update the date at the top of this page.</p>
+    </div>
+  </section>
+</Base>
+<style>
+  .prose a { color: var(--cyan-400); }
+</style>

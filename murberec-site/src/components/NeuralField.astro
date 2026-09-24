@@ -1,0 +1,71 @@
+---
+/**
+ * Decorative network of nodes and synapses, generated at build time from a
+ * fixed seed so it is identical on every build. Pure SVG + CSS: no JS, no
+ * image request, and it stops pulsing under prefers-reduced-motion.
+ */
+interface Props { seed?: number; nodes?: number; class?: string }
+const { seed = 7, nodes: count = 46, class: cls = '' } = Astro.props;
+
+let s = seed;
+const rand = () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646;
+
+const W = 800, H = 800;
+const nodes = Array.from({ length: count }, () => {
+  // Bias toward a loose ring so the centre stays open.
+  const a = rand() * Math.PI * 2;
+  const r = 140 + rand() * 250;
+  return { x: W / 2 + Math.cos(a) * r, y: H / 2 + Math.sin(a) * r * 0.92, r: 1.5 + rand() * 3.5 };
+});
+const links: [number, number, number][] = [];
+nodes.forEach((n, i) => {
+  nodes
+    .map((m, j) => ({ j, d: Math.hypot(n.x - m.x, n.y - m.y) }))
+    .filter(({ j }) => j > i)
+    .sort((p, q) => p.d - q.d)
+    .slice(0, 3)
+    .forEach(({ j, d }) => d < 190 && links.push([i, j, d]));
+});
+const hubs = new Set(Array.from({ length: 9 }, () => Math.floor(rand() * count)));
+const f = (v: number) => v.toFixed(1);
+---
+<svg class={`neural ${cls}`} viewBox={`0 0 ${W} ${H}`} aria-hidden="true" focusable="false">
+  <defs>
+    <radialGradient id="nf-glow">
+      <stop offset="0" stop-color="#23d2e2" stop-opacity="0.35" />
+      <stop offset="1" stop-color="#23d2e2" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <circle cx={W / 2} cy={H / 2} r="330" fill="url(#nf-glow)" class="neural__halo" />
+  <g class="neural__links">
+    {links.map(([a, b], k) => (
+      <line x1={f(nodes[a].x)} y1={f(nodes[a].y)} x2={f(nodes[b].x)} y2={f(nodes[b].y)}
+        class={k % 5 === 0 ? 'fire' : ''} style={`--d:${(k % 11) * 0.45}s`} />
+    ))}
+  </g>
+  <g class="neural__nodes">
+    {nodes.map((n, i) => (
+      <circle cx={f(n.x)} cy={f(n.y)} r={f(hubs.has(i) ? n.r + 2.5 : n.r)}
+        class={hubs.has(i) ? 'hub' : ''} style={`--d:${(i % 9) * 0.6}s`} />
+    ))}
+  </g>
+</svg>
+
+<style>
+  .neural { width: 100%; height: auto; overflow: visible; }
+  .neural__links line { stroke: #3f3f46; stroke-width: 1; }
+  .neural__links line.fire {
+    stroke: #23d2e2; stroke-width: 1.2; stroke-dasharray: 6 240; stroke-dashoffset: 246;
+    animation: fire 4.5s var(--d) linear infinite;
+  }
+  .neural__nodes circle { fill: #71717a; }
+  .neural__nodes circle.hub { fill: #23d2e2; animation: pulse 3.6s var(--d) ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .neural__halo { animation: breathe 9s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+  @keyframes fire { to { stroke-dashoffset: 0; } }
+  @keyframes pulse { 50% { transform: scale(1.6); opacity: 0.55; } }
+  @keyframes breathe { 50% { transform: scale(1.08); opacity: 0.7; } }
+  @media (prefers-reduced-motion: reduce) {
+    .neural * { animation: none !important; }
+    .neural__links line.fire { stroke-dasharray: none; }
+  }
+</style>

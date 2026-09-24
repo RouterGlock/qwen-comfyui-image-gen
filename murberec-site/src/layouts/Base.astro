@@ -1,0 +1,107 @@
+---
+import '@fontsource-variable/manrope';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '../styles/global.css';
+import manropeLatin from '@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?url';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { site, hasAddress } from '../data/site';
+
+interface Crumb { name: string; path: string }
+interface Props {
+  title: string;
+  description: string;
+  /** Breadcrumb trail after Home, e.g. [{ name: 'About', path: '/about' }]. */
+  crumbs?: Crumb[];
+  /** Extra JSON-LD objects for this page (e.g. FAQPage, Service). */
+  schema?: Record<string, unknown>[];
+  noindex?: boolean;
+}
+
+const { title, description, crumbs = [], schema = [], noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname.replace(/\/$/, '') || '/', site.url).href;
+const fullTitle = crumbs.length ? `${title} | ${site.name}` : title;
+const ogImage = new URL('/og.png', site.url).href;
+
+const org = {
+  '@context': 'https://schema.org',
+  '@type': ['Organization', 'ProfessionalService'],
+  '@id': `${site.url}/#org`,
+  name: site.name,
+  url: site.url,
+  logo: `${site.url}/favicon.svg`,
+  image: ogImage,
+  description: site.description,
+  slogan: site.tagline,
+  knowsAbout: ['Leadership development', 'Learning and development', 'Learning experience design', 'Change management', 'Product design', 'Neuroscience'],
+  ...(site.email && { email: site.email }),
+  ...(site.phone && { telephone: site.phone }),
+  ...(hasAddress() && {
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: site.address.street,
+      addressLocality: site.address.locality,
+      addressRegion: site.address.region,
+      postalCode: site.address.postalCode,
+      addressCountry: site.address.country,
+    },
+  }),
+  ...(site.social.length && { sameAs: site.social.map((s) => s.href) }),
+};
+
+const breadcrumbs = crumbs.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [{ name: 'Home', path: '/' }, ...crumbs].map((c, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: c.name,
+        item: new URL(c.path, site.url).href,
+      })),
+    }
+  : null;
+
+const jsonLd = [org, breadcrumbs, ...schema].filter(Boolean);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#09090b" />
+    <link rel="preload" href={manropeLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {jsonLd.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}
+
+    <script is:inline>document.documentElement.classList.add('js');</script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Nav />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      import '../scripts/site';
+    </script>
+  </body>
+</html>

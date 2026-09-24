@@ -1,0 +1,95 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import CtaBand from '../components/CtaBand.astro';
+import SectionHead from '../components/SectionHead.astro';
+import NeuralField from '../components/NeuralField.astro';
+
+const crumbs = [{ name: 'Xtudio®', path: '/xtudio' }];
+// TODO(owner): add real reels. Each entry needs a poster image, a video/embed URL and a short caption.
+const reels: { title: string; client: string; poster: string; src: string }[] = [];
+const disciplines = [
+  {
+    title: 'eLearning & LXD',
+    body: 'Custom eLearning and learning experience design, built on the same science as our consulting. Interactive, scenario-based and designed to be remembered.',
+    items: ['Interactive modules', 'Scenario & branching design', 'Microlearning', 'Video-based learning'],
+  },
+  {
+    title: 'Marketing & brand storytelling',
+    body: 'Stories that make people feel something, because emotion is what the brain remembers. Brand films, campaigns and narrative strategy.',
+    items: ['Brand films', 'Campaign concepts', 'Narrative strategy', 'Motion design'],
+  },
+  {
+    title: 'Social & digital content',
+    body: 'Content made for the feed and the attention span. Short-form video, social campaigns and digital assets that earn the scroll-stop.',
+    items: ['Short-form video', 'Social campaigns', 'Digital assets', 'Content systems'],
+  },
+];
+---
+<Base
+  title="Xtudio® | eLearning, Brand Storytelling & Digital Content"
+  description="Xtudio® is the content arm of MURBEREC®: custom eLearning and learning experience design, brand storytelling and social content, all grounded in how people pay attention."
+  crumbs={crumbs}
+>
+  <PageHero crumbs={crumbs} kicker="The content arm of MURBEREC®" title="Xtudio<sup class='accent xt-reg'>®</sup>"
+    lede="Where the science becomes something people want to watch, click and share. We make learning, brand and digital content in-house, designed around how attention and memory actually work." />
+
+  <section class="section" aria-labelledby="xt-disc">
+    <div class="wrap">
+      <SectionHead num={1} label="What we make" aside="3 disciplines" />
+      <h2 id="xt-disc" class="sr-only">Disciplines</h2>
+      <ol class="xt-disc">
+        {disciplines.map((d, i) => (
+          <li class="reveal">
+            <p class="mono accent">0{i + 1}</p>
+            <h3 class="h3">{d.title}</h3>
+            <p class="muted">{d.body}</p>
+            <ul class="mono muted">{d.items.map((it) => <li>{it}</li>)}</ul>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section surface" aria-labelledby="xt-reel">
+    <div class="wrap">
+      <SectionHead num={2} label="Selected work" />
+      <h2 id="xt-reel" class="h2">The <span class="accent">reel.</span></h2>
+      {reels.length > 0 ? (
+        <ul class="reels">
+          {reels.map((r) => (
+            <li>
+              <video controls preload="none" poster={r.poster} src={r.src} aria-label={`${r.title} for ${r.client}`}></video>
+              <p class="mono muted">{r.client} / {r.title}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div class="reel-soon">
+          <div class="reel-soon__art"><NeuralField seed={21} nodes={36} /></div>
+          <div>
+            <p class="lede">Our full reel is available on request. Tell us what you’re working on and we’ll share the pieces most relevant to you.</p>
+            <a class="btn" href="/contact?topic=xtudio" data-track="cta_click" data-track-where="xtudio-reel">Request the reel <span class="arrow" aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <CtaBand where="xtudio" heading="Have a story to tell?" body="From a single eLearning module to a full brand campaign, start with a 30-minute conversation about what you need people to feel, know and do." />
+</Base>
+<style>
+  :global(.xt-reg) { font-size: 0.35em; vertical-align: top; }
+  .xt-disc { list-style: none; display: grid; gap: var(--space-l); }
+  .xt-disc > li { display: grid; gap: var(--space-s); align-content: start; border-top: 1px solid var(--ink-700); padding-top: var(--space-m); }
+  .xt-disc ul { list-style: none; display: grid; gap: 0.3rem; margin-top: var(--space-s); }
+  .xt-disc ul li::before { content: '+ '; color: var(--cyan-400); }
+  @media (min-width: 56rem) { .xt-disc { grid-template-columns: repeat(3, 1fr); } }
+  .reels { list-style: none; display: grid; gap: var(--space-m); grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); margin-top: var(--space-l); }
+  .reels video { width: 100%; aspect-ratio: 16/9; background: var(--ink-800); }
+  .reels p { margin-top: var(--space-xs); }
+  .reel-soon { display: grid; gap: var(--space-l); align-items: center; margin-top: var(--space-xl); }
+  .reel-soon > div:last-child { display: grid; gap: var(--space-m); justify-items: start; }
+  .reel-soon__art { max-width: 20rem; }
+  @media (min-width: 56rem) { .reel-soon { grid-template-columns: 1fr 1.4fr; } }
+</style>

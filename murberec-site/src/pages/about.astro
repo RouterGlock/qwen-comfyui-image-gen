@@ -1,0 +1,99 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import CtaBand from '../components/CtaBand.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Faq from '../components/Faq.astro';
+import { site } from '../data/site';
+import { approach } from '../data/services';
+import { faq } from '../data/faq';
+
+const crumbs = [{ name: 'About', path: '/about' }];
+// TODO(owner): confirm or rewrite the four beliefs.
+const beliefs = [
+  { title: 'People first', body: 'Strategy, systems and tools only work when people do. We start with the humans and design outward.' },
+  { title: 'Science, not slogans', body: 'We use what neuroscience tells us about attention, memory, emotion and habit as a lens, not a gimmick.' },
+  { title: 'Built for you', body: 'No templates, no playbooks. The shape of the solution comes from the diagnosis, not from what we sold last time.' },
+  { title: 'Stay until it sticks', body: 'Launch is the middle, not the end. We measure and reinforce until new behavior holds on its own.' },
+];
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+<Base
+  title="About Us | People-First, Neuroscience-Informed Consulting"
+  description="Meet MURBEREC®: a people-first consulting firm using neuroscience to design leadership, learning and change programs. Our beliefs, how we work, and answers to common questions."
+  crumbs={crumbs}
+  schema={[faqSchema]}
+>
+  <PageHero crumbs={crumbs} kicker="About MURBEREC®" title="We design for <span class='accent'>how people actually work.</span>"
+    lede="MURBEREC® exists because too much consulting treats people as the last step. We put them first, and use what neuroscience tells us about attention, learning and habit to design change that lasts." />
+
+  <section class="section" aria-labelledby="beliefs">
+    <div class="wrap">
+      <SectionHead num={1} label="What we believe" aside="4 beliefs" />
+      <h2 id="beliefs" class="sr-only">What we believe</h2>
+      <ol class="beliefs">
+        {beliefs.map((b, i) => (
+          <li class="reveal"><p class="mono accent">0{i + 1}</p><h3 class="h3">{b.title}</h3><p class="muted">{b.body}</p></li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section surface" aria-labelledby="how">
+    <div class="wrap">
+      <SectionHead num={2} label="How we work" />
+      <h2 id="how" class="h2">Diagnose. Design. <span class="accent">Embed.</span></h2>
+      <ol class="beliefs beliefs--3">
+        {approach.map((a, i) => (
+          <li class="reveal"><p class="mono accent">0{i + 1}</p><h3 class="h3">{a.step}</h3><p class="muted">{a.body}</p></li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section light" aria-labelledby="numbers">
+    <div class="wrap">
+      <SectionHead num={3} label="By the numbers" />
+      <h2 id="numbers" class="sr-only">By the numbers</h2>
+      <dl class="stats">
+        {site.stats.map((s) => (
+          <div class="stat reveal"><dt class="mono muted stat__label">{s.label}</dt><dd class="stat__value">{s.value}</dd></div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="industries">
+    <div class="wrap">
+      <SectionHead num={4} label="Industries" />
+      <h2 id="industries" class="h2">Where we <span class="accent">work.</span></h2>
+      <ul class="pills mono">{site.industries.map((i) => <li>{i}</li>)}</ul>
+    </div>
+  </section>
+
+  <section class="section surface" aria-labelledby="faq">
+    <div class="wrap faq-wrap">
+      <div>
+        <SectionHead num={5} label="FAQ" />
+        <h2 id="faq" class="h2">Good <span class="accent">questions.</span></h2>
+      </div>
+      <Faq items={faq} />
+    </div>
+  </section>
+
+  <CtaBand where="about" />
+</Base>
+<style>
+  .beliefs { list-style: none; display: grid; gap: var(--space-l); margin-top: var(--space-l); }
+  .beliefs li { display: grid; gap: var(--space-s); align-content: start; border-top: 1px solid var(--ink-700); padding-top: var(--space-m); }
+  @media (min-width: 48rem) { .beliefs { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 72rem) { .beliefs { grid-template-columns: repeat(4, 1fr); } .beliefs--3 { grid-template-columns: repeat(3, 1fr); } }
+  .pills { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-s); margin-top: var(--space-l); }
+  .pills li { border: 1px solid var(--ink-700); padding: 0.7rem 1.1rem; border-radius: 999px; }
+  .faq-wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-l); }
+  @media (min-width: 60rem) { .faq-wrap { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); } }
+</style>
