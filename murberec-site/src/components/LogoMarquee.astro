@@ -4,15 +4,28 @@
  * for a seamless loop; the copy is hidden from screen readers. Pauses on
  * hover/focus, and becomes a static wrapped grid under reduced motion.
  */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { site } from '../data/site';
-const clients = site.clients;
+
+// Optical sizing: wide wordmarks get less height, square marks more, so every
+// logo carries similar visual weight. Dimensions come from the PNG header.
+const pngSize = (file: string) => {
+  const buf = readFileSync(join(process.cwd(), 'public', file));
+  return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+};
+const clients = site.clients.map((c) => {
+  const { w, h } = pngSize(c.logo);
+  const height = Math.min(84, Math.round(80 * Math.pow(w / h, -0.45)));
+  return { ...c, width: Math.round((height * w) / h), height };
+});
 ---
 <div class="marquee" role="region" aria-label="Organizations our team has delivered for">
   <div class="marquee__track">
     {[0, 1].map((copy) => (
       <ul class="marquee__group" aria-hidden={copy === 1 ? 'true' : undefined}>
         {clients.map((c) => (
-          <li><img src={c.logo} alt={copy === 1 ? '' : c.name} decoding="async" /></li>
+          <li><img src={c.logo} alt={copy === 1 ? '' : c.name} width={c.width} height={c.height} style={`--h:${c.height}px`} decoding="async" /></li>
         ))}
       </ul>
     ))}
@@ -29,7 +42,10 @@ const clients = site.clients;
   .marquee:hover .marquee__track, .marquee:focus-within .marquee__track { animation-play-state: paused; }
   .marquee__group { list-style: none; display: flex; align-items: center; flex-shrink: 0; gap: clamp(2.5rem, 5vw, 4.5rem); padding-right: clamp(2.5rem, 5vw, 4.5rem); }
   .marquee__group li { flex-shrink: 0; display: flex; align-items: center; }
-  .marquee__group img { display: block; height: clamp(56px, 7vw, 88px); width: auto; max-width: clamp(130px, 14vw, 200px); object-fit: contain; }
+  .marquee__group li { height: calc(84px * var(--s)); }
+  .marquee__group img { display: block; height: calc(var(--h) * var(--s)); width: auto; }
+  .marquee { --s: 1; }
+  @media (max-width: 40rem) { .marquee { --s: 0.72; } }
   @keyframes marquee { to { transform: translateX(-50%); } }
 
   @media (prefers-reduced-motion: reduce) {
