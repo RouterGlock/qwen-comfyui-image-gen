@@ -42,7 +42,7 @@ const audiences = [
 
       <div class="form-wrap">
         <h2 class="h3 form__title">Tell us what you’re building</h2>
-        <form id="contact-form" class="form" action="/api/contact" method="post" novalidate>
+        <form id="contact-form" class="form" action="/api/contact" method="post" novalidate data-email={site.email || undefined}>
           <fieldset class="aud">
             <legend class="mono muted">I’m reaching out as</legend>
             <div class="aud__opts">
@@ -181,6 +181,7 @@ const audiences = [
   import { track } from '../scripts/site';
 
   const form = document.querySelector<HTMLFormElement>('#contact-form')!;
+  const email = form.dataset.email;
   const thanks = document.querySelector<HTMLElement>('#thanks')!;
   const status = form.querySelector<HTMLElement>('.form__status')!;
   const orgLabel = form.querySelector('[data-org-label]')!;
@@ -256,7 +257,7 @@ const audiences = [
       thanks.focus();
       thanks.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     } catch (err) {
-      status.textContent = `${(err as Error).message} Please try again.`;
+      status.textContent = `${(err as Error).message} Please try again${email ? ` or email ${email}` : ''}.`;
       status.classList.add('is-error');
       track('form_error', { form: 'contact', reason: 'server' });
       (window as any).turnstile?.reset();

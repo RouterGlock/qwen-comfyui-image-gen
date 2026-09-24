@@ -6,7 +6,8 @@ import { nav, site } from '../data/site';
 const mark = readFileSync(join(process.cwd(), 'public/brand/murberec-mark.svg'), 'utf8')
   .replace(/<!--[\s\S]*?-->/g, '')
   .replace('role="img" aria-label="MURBEREC"', 'aria-hidden="true" focusable="false"');
-const path = Astro.url.pathname;
+// Compare without the preview base (/murberec) so the current page still highlights.
+const path = Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '').replace(/\/$/, '') || '/';
 const isCurrent = (href: string) => path === href || path.startsWith(href + '/');
 ---
 <header class="nav">
