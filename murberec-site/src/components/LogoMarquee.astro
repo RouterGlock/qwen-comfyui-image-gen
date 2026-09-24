@@ -1,0 +1,41 @@
+---
+/**
+ * Auto-scrolling client logo strip. Two identical groups slide left by 50%
+ * for a seamless loop; the copy is hidden from screen readers. Pauses on
+ * hover/focus, and becomes a static wrapped grid under reduced motion.
+ */
+import { site } from '../data/site';
+const clients = site.clients;
+---
+<div class="marquee" role="region" aria-label="Organizations our team has delivered for">
+  <div class="marquee__track">
+    {[0, 1].map((copy) => (
+      <ul class="marquee__group" aria-hidden={copy === 1 ? 'true' : undefined}>
+        {clients.map((c) => (
+          <li><img src={c.logo} alt={copy === 1 ? '' : c.name} decoding="async" /></li>
+        ))}
+      </ul>
+    ))}
+  </div>
+</div>
+
+<style>
+  .marquee {
+    overflow: hidden; padding-block: var(--space-m);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+  .marquee__track { display: flex; width: max-content; animation: marquee 45s linear infinite; }
+  .marquee:hover .marquee__track, .marquee:focus-within .marquee__track { animation-play-state: paused; }
+  .marquee__group { list-style: none; display: flex; align-items: center; flex-shrink: 0; gap: clamp(2.5rem, 5vw, 4.5rem); padding-right: clamp(2.5rem, 5vw, 4.5rem); }
+  .marquee__group li { flex-shrink: 0; display: flex; align-items: center; }
+  .marquee__group img { display: block; height: clamp(56px, 7vw, 88px); width: auto; max-width: clamp(130px, 14vw, 200px); object-fit: contain; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee { -webkit-mask-image: none; mask-image: none; }
+    .marquee__track { animation: none; width: auto; }
+    .marquee__group { flex-wrap: wrap; justify-content: center; row-gap: var(--space-l); padding-right: 0; }
+    .marquee__group[aria-hidden='true'] { display: none; }
+  }
+</style>

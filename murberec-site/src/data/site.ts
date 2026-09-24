@@ -41,10 +41,23 @@ export const site = {
     { value: '50+', label: 'Enterprise engagements' },
   ],
 
-  // TODO(owner): only list clients approved for public use. Each needs a
-  // logo in /public/clients/ and real alt text. The section is hidden while
-  // this list is empty.
-  clients: [] as { name: string; logo: string }[],
+  // As shown on the current murberec.com ("Our team has delivered for").
+  // Logos are cropped from screenshots of that site; swap in the original
+  // files in /public/clients/ (same names) for sharper rendering.
+  clients: [
+    { name: 'Gap', logo: '/clients/gap.png' },
+    { name: 'CommonSpirit Health', logo: '/clients/commonspirit.png' },
+    { name: 'Athleta', logo: '/clients/athleta.png' },
+    { name: 'Marriott Vacations Worldwide', logo: '/clients/marriott-vacations-worldwide.png' },
+    { name: 'Capgemini', logo: '/clients/capgemini.png' },
+    { name: 'Old Navy', logo: '/clients/old-navy.png' },
+    { name: 'Stryker', logo: '/clients/stryker.png' },
+    { name: 'Defense Language Institute', logo: '/clients/defense-language-institute.png' },
+    { name: 'Banana Republic', logo: '/clients/banana-republic.png' },
+    { name: 'Best Buy', logo: '/clients/best-buy.png' },
+    { name: 'VMware', logo: '/clients/vmware.png' },
+    { name: 'Verizon', logo: '/clients/verizon.png' },
+  ] as { name: string; logo: string }[],
 
   industries: ['Technology', 'Healthcare', 'Retail & media', 'Professional services', 'Public sector'],
 
